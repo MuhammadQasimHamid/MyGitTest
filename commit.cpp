@@ -4,5 +4,7 @@ using namespace std;
 
 void commitCommandExe(int argc, char *argv[])
 {
-    // gitObject gitObj();
+    GitObject gitObj(Blob, "Umar Rana is here.");
+    cout << "here is hash of my name" << endl;
+    cout << gitObj.getHash() << endl;
 }

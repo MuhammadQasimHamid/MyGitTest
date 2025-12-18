@@ -23,7 +23,10 @@ public:
     }
     string getHash()
     {
-        // string hashed = SHA1();
-        // return hashed;
+        string header = to_string(objectType) + " " + to_string(content.size()) + "\0";
+        string store = header + content;
+
+        string hash = sha1(store);
+        return hash;
     }
 };
