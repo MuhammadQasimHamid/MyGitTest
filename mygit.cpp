@@ -3,7 +3,7 @@
 #include "help.cpp"
 #include "init.cpp"
 #include "add.cpp"
-#include "gitObject.cpp"
+#include "commit.cpp"
 using namespace std;
 
 typedef void (*cmdFunc)(int argc, char *argv[]);

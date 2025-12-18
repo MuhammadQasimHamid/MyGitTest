@@ -19,14 +19,3 @@ std::string sha1(const std::string &input)
     }
     return ss.str();
 }
-
-int main()
-{
-    std::string text = "test";
-    std::string hashed_text = sha1(text);
-
-    std::cout << "Original: " << text << std::endl;
-    std::cout << "SHA-1 Hash: " << hashed_text << std::endl;
-
-    return 0;
-}
