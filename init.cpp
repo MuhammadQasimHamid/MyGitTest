@@ -1,8 +1,7 @@
-#include<iostream>
+#include <iostream>
 using namespace std;
 
-void initCommandExe(int argc, char* argv[])
+void initCommandExe(int argc, char *argv[])
 {
-    888
-    
+    return;
 }
