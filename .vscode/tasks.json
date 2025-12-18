@@ -8,6 +8,10 @@
                 "-fdiagnostics-color=always",
                 "-g",
                 "${file}",
+                "-I", "C:/Program Files/OpenSSL-Win64/include",
+                "-L", "C:/Program Files/OpenSSL-Win64/lib",
+                "-llibssl",
+                "-llibcrypto",
                 "-o",
                 "${fileDirname}\\${fileBasenameNoExtension}.exe"
             ],
