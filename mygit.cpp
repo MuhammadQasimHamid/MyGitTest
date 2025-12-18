@@ -8,7 +8,7 @@ using namespace std;
 
 typedef void (*cmdFunc)(int argc, char *argv[]);
 
-// command funcds
+// command functions
 void initCommandExe(int argc, char *argv[]);
 void addCommandExe(int argc, char *argv[]);
 void helpCommandExe(int argc, char *argv[]);
