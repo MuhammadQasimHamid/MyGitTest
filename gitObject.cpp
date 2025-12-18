@@ -1,5 +1,6 @@
 #include<iostream>
 #include<fstream>
+#include <openssl/sha.h>
 using namespace std;
 
 enum GitObjectType{
@@ -19,5 +20,9 @@ class GitObject
         this->objectType = objType;
         this->content = content;
     }
-
+    string getHash()
+    {
+        string hashed = SHA1();
+        return hashed;
+    }
 };

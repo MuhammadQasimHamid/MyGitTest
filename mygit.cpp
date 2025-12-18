@@ -3,6 +3,7 @@
 #include "help.cpp"
 #include "init.cpp"
 #include "add.cpp"
+#include "gitObject.cpp"
 using namespace std;
 
 typedef void (*cmdFunc)(int argc, char *argv[]);
@@ -11,6 +12,7 @@ typedef void (*cmdFunc)(int argc, char *argv[]);
 void initCommandExe(int argc, char *argv[]);
 void addCommandExe(int argc, char *argv[]);
 void helpCommandExe(int argc, char *argv[]);
+void commitCommandExe(int argc, char *argv[]);
 
 map<string, cmdFunc> cmdCodes;
 
@@ -20,6 +22,7 @@ void loadConfiguraion()
     cmdCodes["init"] = initCommandExe;
     cmdCodes["add"] = addCommandExe;
     cmdCodes["--help"] = helpCommandExe;
+    cmdCodes["commit"] = commitCommandExe;
 }
 main(int argc, char *argv[])
 {
