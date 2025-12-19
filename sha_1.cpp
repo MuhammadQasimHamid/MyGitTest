@@ -1,8 +1,12 @@
+#ifndef sha_1
+#define sha_1
+
 #include <iostream>
 #include <iomanip>
 #include <sstream>
 #include <string>
 #include <openssl/sha.h>
+
 
 std::string sha1(const std::string &input)
 {
@@ -19,3 +23,5 @@ std::string sha1(const std::string &input)
     }
     return ss.str();
 }
+
+#endif

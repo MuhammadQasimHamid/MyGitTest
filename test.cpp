@@ -3,30 +3,25 @@
 #include <sstream>
 #include <string>
 #include <openssl/sha.h>
+#include <iostream>
+#include <filesystem>
+#include <string>
 
-std::string sha1(const std::string &input)
-{
-    unsigned char hash[SHA_DIGEST_LENGTH];
+namespace fs = std::filesystem;
 
-    // Compute the SHA-1 hash
-    SHA1(reinterpret_cast<const unsigned char *>(input.c_str()), input.length(), hash);
+int main() {
+    std::string directory_path = "new_folder"; // Relative path
+    // Or an absolute path: "C:/Users/Example/new_folder" (use forward slashes for portability)
 
-    // Convert binary hash to a hexadecimal string
-    std::stringstream ss;
-    for (int i = 0; i < SHA_DIGEST_LENGTH; i++)
-    {
-        ss << std::hex << std::setfill('0') << std::setw(2) << static_cast<int>(hash[i]);
+    try {
+        if (fs::create_directory(directory_path)) {
+            std::cout << "Directory '" << directory_path << "' created successfully." << std::endl;
+        } else {
+            std::cout << "Directory '" << directory_path << "' already exists (or failed for another reason)." << std::endl;
+        }
+    } catch (const fs::filesystem_error& e) {
+        std::cerr << "Error creating directory: " << e.what() << std::endl;
     }
-    return ss.str();
-}
-
-int main()
-{
-    std::string text = "test";
-    std::string hashed_text = sha1(text);
-
-    std::cout << "Original: " << text << std::endl;
-    std::cout << "SHA-1 Hash: " << hashed_text << std::endl;
 
     return 0;
 }

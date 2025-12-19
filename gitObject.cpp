@@ -4,7 +4,7 @@
 #include <string>
 #include <iomanip>
 #include <openssl/sha.h>
-#include "sha1.cpp"
+#include "sha_1.cpp"
 #include "parser.cpp"
 using namespace std;
 
@@ -13,14 +13,16 @@ enum GitObjectType
     Blob,
     Tree,
     Commit,
-    Tag
+    Tag,
+    Nothing
 };
 GitObjectType stoGitObjectType(string str)
 {
     if(str == "tree") return Tree;
     if(str == "commit") return Commit;
     if(str == "blob") return Blob;
-    if(str == "tag") return Tag;        
+    if(str == "tag") return Tag;       
+    return Nothing; 
 }
 struct treeEntry
 {
