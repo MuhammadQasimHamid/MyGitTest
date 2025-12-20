@@ -24,11 +24,14 @@ string readFile(const filesystem::path &filePath)
 {
     string contents = "";
     string line;
+    cout << "read file" << endl;
     ifstream file(filePath);
-    if (!file.is_open())
+    if (file.is_open())
     {
+        cout << "is open" << endl;
         while (!file.eof())
         {
+            cout << "while" << endl;
             getline(file, line);
             contents += line + "\n";
         }
@@ -48,4 +51,4 @@ void writeFileWithBytes(const string &path, const vector<unsigned char> &data)
     file.close();
 }
 
-#endif
+#endif/

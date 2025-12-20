@@ -10,7 +10,7 @@ using namespace std::filesystem;
 using namespace std;
 namespace fs = filesystem;
 
-struct  indexEntry
+struct indexEntry
 {
     string mode;
     string hash;
@@ -31,8 +31,6 @@ struct  indexEntry
         path = this->path;
     }
 };
-
-
 
 class Repository
 {
@@ -139,40 +137,55 @@ public:
     bool addFileToIndex(path filePath)
     {
         vector<indexEntry> indexEntries = loadIndexEntries();
-        for(auto iE:indexEntries)
+        for (auto iE : indexEntries)
         {
-            if(iE.path == filePath)
+            if (iE.path == filePath)
             {
                 // cout << "File Already Added" << endl;
                 return false;
             }
         }
-        indexEntries.push_back(indexEntry("10002","","0",filePath.string()));
+        string fileContents = readFile(filePath);
+        if (!exists(filePath))
+        {
+            cout << "File not exists" << endl;
+            return false;
+        }
+        BlobObject B(filePath.filename().string(), fileContents);
+        indexEntry iE("100644", "hash", "0", filePath.string());
+        indexEntries.push_back(iE);
+        // cout << "index entries" << indexEntries.size() << endl;
+        saveIndexEntries(indexEntries);
         return true;
     }
     vector<indexEntry> loadIndexEntries()
     {
-        string indexFileContents = readFile(indexFilePath); 
-        vector<string> lines = split(indexFileContents,'\n') ;
-        vector<indexEntry> indexEntries (lines.size()); 
-        for(auto l:lines)
+        string indexFileContents = readFile(indexFilePath);
+        cout << "readed: " << indexFileContents;
+        vector<string> lines = split(indexFileContents, '\n');
+        vector<indexEntry> indexEntries;
+        for (auto l : lines)
         {
-            vector<string> parts = split(l,' ');
-            indexEntry iE(parts[0],parts[1],parts[2],parts[3]);
-            indexEntries.push_back(iE);
+            vector<string> parts = split(l, ' ');
+            if (parts.size() == 4)
+            {
+                indexEntry iE(parts[0], parts[1], parts[2], parts[3]);
+                indexEntries.push_back(iE);
+            }
         }
+        // cout << "index entries" << indexEntries.size() << endl;
         return indexEntries;
     }
     void saveIndexEntries(vector<indexEntry> indexEntires)
     {
-        string mode,hash,offset,filepath;
+        string mode, hash, offset, filepath;
         string indexFileContents = "";
-        for(auto iE:indexEntires)
+        for (auto iE : indexEntires)
         {
-            iE.fill(mode,hash,offset,filepath);
+            iE.fill(mode, hash, offset, filepath);
             indexFileContents += mode + " " + hash + " " + offset + " " + filepath + "\n";
         }
-        writeFile(indexFilePath,indexFileContents);
+        writeFile(indexFilePath, indexFileContents);
     }
 };
 

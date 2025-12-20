@@ -53,15 +53,26 @@ struct treeEntry
 
 class GitObject
 {
+protected:
 public:
     GitObjectType objectType;
     string contents;
+    GitObject() {}
+
     GitObject(GitObjectType objType, string contents)
     {
         this->objectType = objType;
         this->contents = contents;
     }
-    GitObject() {}
+    GitObject(string serializedObject) // deserialize object
+    {
+        string header = serializedObject.substr(0,serializedObject.find('\0'));
+        string contents = serializedObject.substr(serializedObject.find('\0')+1);
+
+        vector<string>  parts = split(header,'\n');
+        objectType = stoGitObjectType(parts[0]);
+    }
+    
     string getHash()
     {
         string header = to_string(objectType) + " " + to_string(contents.size()) + "\0";
@@ -77,12 +88,14 @@ public:
         string headerContent = header + contents;
         return headerContent;
     }
+
 };
 
 class BlobObject : GitObject
 {
 public:
-    BlobObject(string contents) : GitObject(Blob, contents) {}
+    BlobObject(string filename,string contents) : GitObject(Blob, contents) {}
+    BlobObject(string serializedObject) : GitObject(serializedObject) {}
 };
 
 class CommitObject : GitObject
@@ -102,7 +115,7 @@ public:
         this->timeStamp = timeStamp;
         this->contents = serializeContent();
     }
-    CommitObject(string contents) : GitObject(Commit, contents) // desterilize
+    CommitObject(string serializedObject) : GitObject(serializedObject) // desterilize contents
     {
         vector<string> lines = split(contents, '\n');
         for (auto l : lines)
@@ -122,7 +135,7 @@ public:
                 message = l;
         }
     }
-
+    private:
     string serializeContent()
     {
         string res = "";
@@ -142,7 +155,7 @@ class TreeObject : GitObject
     TreeObject() : GitObject(Tree, "")
     {
     }
-    TreeObject(string contents) : GitObject(Tree, contents) // desterilieze (contents to TreeObject)
+    TreeObject(string serilizedObject) : GitObject(serilizedObject) // desterilieze (contents to TreeObject)
     {
         vector<string> lines = split(contents, '\n');
         for (auto l : lines)
@@ -152,6 +165,7 @@ class TreeObject : GitObject
         }
     }
 
+    private:
     string serializeContent()
     {
         string mode, hash, name;
