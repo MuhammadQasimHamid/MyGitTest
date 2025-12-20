@@ -1,0 +1,43 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <zlib.h>
+
+std::vector<unsigned char> compress_git_object(const std::string &data)
+{
+    z_stream strm;
+    strm.zalloc = Z_NULL;
+    strm.zfree = Z_NULL;
+    strm.opaque = Z_NULL;
+
+    // Initialize for compression (Level 6 is the standard Git default)
+    if (deflateInit(&strm, Z_DEFAULT_COMPRESSION) != Z_OK)
+    {
+        return {};
+    }
+
+    strm.next_in = reinterpret_cast<Bytef *>(const_cast<char *>(data.data()));
+    strm.avail_in = static_cast<uInt>(data.size());
+
+    // Use compressBound to ensure the output buffer is large enough
+    uLong output_bound = compressBound(data.size());
+    std::vector<unsigned char> out_buffer(output_bound);
+
+    strm.next_out = out_buffer.data();
+    strm.avail_out = static_cast<uInt>(out_buffer.size());
+
+    // Perform compression. Z_FINISH ensures the stream is properly closed.
+    int ret = deflate(&strm, Z_FINISH);
+
+    // Clean up zlib state
+    deflateEnd(&strm);
+
+    if (ret != Z_STREAM_END)
+    {
+        return {}; // Error occurred
+    }
+
+    // Shrink the vector to the actual number of compressed bytes produced
+    out_buffer.resize(strm.total_out);
+    return out_buffer;
+}

@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <filesystem>
+#include "gitObject.cpp"
 using namespace std::filesystem;
 class Repository
 {
@@ -64,7 +65,9 @@ public:
         return false;
     }
 
-    void storeObject()
+    void storeObject(GitObject object)
     {
+        string hash = object.getHash();
+        // path dirName = objectsFolderPath /
     }
 };
