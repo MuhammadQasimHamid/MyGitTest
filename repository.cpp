@@ -1,13 +1,12 @@
 #ifndef REPOSITORY_H
 #define REPOSITORY_H
 
-
 #include <iostream>
 #include <fstream>
 #include <filesystem>
 #include "gitObject.cpp"
 using namespace std;
-namespace fs= filesystem;
+namespace fs = filesystem;
 class Repository
 {
 public:
@@ -68,42 +67,56 @@ public:
         }
         return false;
     }
-    
 
-    void storeObject(GitObject gitObj )
+    void storeObject(GitObject gitObj)
     {
-        string objHash = gitObj.getHash(); // 
-        fs::path objectDirPath = objectsFolderPath / objHash.substr(0,2);
-        
+        string objHash = gitObj.getHash(); //
+        fs::path objectDirPath = objectsFolderPath / objHash.substr(0, 2);
+
         string objectName = objHash.substr(2);
         fs::path objectFilePath = objectDirPath / objectName;
         try
         {
-            if(!exists(objectDirPath))
+            if (!exists(objectDirPath))
             {
                 fs::create_directory(objectDirPath);
                 ofstream objectFile(objectFilePath);
-                if(objectFile.is_open())
+                if (objectFile.is_open())
                 {
                     objectFile << gitObj.contents;
                 }
                 objectFile.close();
             }
         }
-        catch(const exception &e)
+        catch (const exception &e)
         {
             cout << "Error: " << e.what() << endl;
         }
-        catch(...)
+        catch (...)
         {
             cout << "There is an error in storing object(s)." << endl;
         }
     }
+    string currentBranch()
+    {
+        string line;
+        fstream headFile(HEADFilePath,ios::in); // this file stores pointer to branches
+        if (headFile.is_open())
+        {
+            // stores current branch in /HEAD
+            getline(headFile,line);
+            vector<string> parts = split(line,' ');
+            fs::path refPath = parts[1];
+            return refPath.filename().string();
+        }
+        return "DETACHED HEAD";
+    }
 
+    void addFileToIndex(fs::path filePath)
+    {
+        
+    }
 
 };
-
-
-
 
 #endif
