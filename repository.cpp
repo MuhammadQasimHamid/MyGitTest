@@ -1,6 +1,6 @@
-#include<iostream>
-#include<filesystem>
-// #include<ostream>
+#include <iostream>
+#include "makeDirectory.cpp"
+#include "fileCRUD.cpp"
 using namespace std;
 
 namespace fs = filesystem;
@@ -8,27 +8,44 @@ namespace fs = filesystem;
 // namespace fs = std::filesystem;
 class Repository
 {
-    public:
+public:
     string path = "";
     Repository()
     {
-
     }
-    void initRepo()
+    bool initRepo() // returns true if repo initialized successfully
     {
         try
         {
+            // Directories
+            makeDirectory(".pit");
+            // .git/objects
+            makeDirectory(".pit/objects");
+            // .git/refs
+            makeDirectory(".pit/refs");
+            // .git/refs/heads
+            makeDirectory(".pit/refs/heads");
 
-            fs::create_directory(".mygit");
-            fs::create_directory(".mygit/objects");
-            fs::create_directory(".mygit/refs");
-            fs::create_directory(".mygit/refs/heads");
-            // fs::create_directory(".mygit/logs");            
+            // Files
+            //  .git/HEAD
+            makeFile(".pit/HEAD"); // this file stores pointer to branches
+            // .git/index
+            makeFile(".pit/index");
 
+            // stores current branch in /HEAD
+            writeFile(".pit/HEAD", "ref: refs/heads/main\n");
+
+            cout << "Initialized empty git repository." << endl;
+            return true;
         }
-        catch(fs::filesystem_error e)
+        catch (const exception &e)
         {
-            cout << "Error: " << e.what() << endl;
-        }    
+            cerr << e.what() << '\n';
+        }
+        catch (...)
+        {
+            cerr << "Their is any error occurs during creating repository." << endl;
+        }
+        return false;
     }
 };

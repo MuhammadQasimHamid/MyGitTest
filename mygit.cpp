@@ -27,7 +27,7 @@ void loadConfiguraion()
 main(int argc, char *argv[])
 {
     loadConfiguraion();
-    cout << "Git Refreshed" << endl;
+    cout << "Pit Refreshed" << endl;
     if (argc > 1)
     {
         callFunc(argc, argv);

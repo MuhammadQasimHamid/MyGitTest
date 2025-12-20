@@ -3,7 +3,7 @@
 #include <vector>
 #include <string>
 #include <iomanip>
-#include <openssl/sha.h>
+// #include <openssl/sha.h>
 #include "sha_1.cpp"
 #include "parser.cpp"
 using namespace std;
@@ -18,11 +18,15 @@ enum GitObjectType
 };
 GitObjectType stoGitObjectType(string str)
 {
-    if(str == "tree") return Tree;
-    if(str == "commit") return Commit;
-    if(str == "blob") return Blob;
-    if(str == "tag") return Tag;       
-    return Nothing; 
+    if (str == "tree")
+        return Tree;
+    if (str == "commit")
+        return Commit;
+    if (str == "blob")
+        return Blob;
+    if (str == "tag")
+        return Tag;
+    return Nothing;
 }
 struct treeEntry
 {
@@ -44,7 +48,6 @@ struct treeEntry
         hash = this->hash;
         name = this->name;
     }
-    
 };
 
 class GitObject
@@ -72,7 +75,6 @@ class BlobObject : GitObject
 {
 public:
     BlobObject(string contents) : GitObject(Blob, contents) {}
-
 };
 
 class CommitObject : GitObject
@@ -92,13 +94,13 @@ public:
         this->timeStamp = timeStamp;
         this->contents = serializeContent();
     }
-    CommitObject(string contents):GitObject(Commit, contents) // desterilize
+    CommitObject(string contents) : GitObject(Commit, contents) // desterilize
     {
         vector<string> lines = split(contents, '\n');
         for (auto l : lines)
         {
             vector<string> parts = split(l, ' '); // divide line into parts
-            string key = parts[0]; // heading of the part
+            string key = parts[0];                // heading of the part
             if (key == "tree")
                 treeHash = parts[1];
             else if (key == "parent")
@@ -126,39 +128,36 @@ public:
     }
 };
 
-class TreeObject:GitObject
+class TreeObject : GitObject
 {
     vector<treeEntry> entires;
-    TreeObject():GitObject(Tree,"")
+    TreeObject() : GitObject(Tree, "")
     {
-        
     }
-    TreeObject(string contents):GitObject(Tree,contents)// desterilieze (contents to TreeObject)
+    TreeObject(string contents) : GitObject(Tree, contents) // desterilieze (contents to TreeObject)
     {
-        vector<string> lines = split(contents,'\n');
-        for(auto l:lines)
+        vector<string> lines = split(contents, '\n');
+        for (auto l : lines)
         {
-            vector<string> parts = split(l,'\n');
-            entires.push_back(treeEntry(parts[0],stoGitObjectType(parts[1]),parts[2],parts[3]));
+            vector<string> parts = split(l, '\n');
+            entires.push_back(treeEntry(parts[0], stoGitObjectType(parts[1]), parts[2], parts[3]));
         }
     }
-    
 
     string serializeContent()
     {
-        string mode,hash,name;
+        string mode, hash, name;
         GitObjectType type;
         string res = "";
-        for(auto e:entires)
+        for (auto e : entires)
         {
             e.fill(mode, type, hash, name); // fill variables from entry
             res += mode + " " + to_string(type) + " " + hash + " " + name + "\n";
         }
         return res;
-    }  
+    }
     void addEntry(treeEntry entry)
     {
         entires.push_back(entry);
     }
 };
-

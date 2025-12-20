@@ -7,7 +7,6 @@
 #include <string>
 #include <openssl/sha.h>
 
-
 std::string sha1(const std::string &input)
 {
     unsigned char hash[SHA_DIGEST_LENGTH];
