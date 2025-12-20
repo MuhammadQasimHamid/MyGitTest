@@ -1,3 +1,5 @@
+#ifndef GITOBJECT_H
+#define GITOBJECT_H
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -165,3 +167,9 @@ class TreeObject : GitObject
         entires.push_back(entry);
     }
 };
+
+
+
+
+
+#endif

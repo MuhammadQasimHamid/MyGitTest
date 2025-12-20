@@ -1,17 +1,23 @@
+#ifndef REPOSITORY_H
+#define REPOSITORY_H
+
+
 #include <iostream>
 #include <fstream>
 #include <filesystem>
-using namespace std::filesystem;
+#include "gitObject.cpp"
+using namespace std;
+namespace fs= filesystem;
 class Repository
 {
 public:
-    path project_absolute = absolute(".");
-    path pitFolderPath = project_absolute / ".pit";
-    path objectsFolderPath = pitFolderPath / "objects";
-    path refsFolderPath = pitFolderPath / "refs";
-    path refsHeadFolderPath = refsFolderPath / "heads";
-    path HEADFilePath = pitFolderPath / "HEAD";
-    path indexFilePath = pitFolderPath / "index";
+    fs::path project_absolute = fs::absolute(".");
+    fs::path pitFolderPath = project_absolute / ".pit";
+    fs::path objectsFolderPath = pitFolderPath / "objects";
+    fs::path refsFolderPath = pitFolderPath / "refs";
+    fs::path refsHeadFolderPath = refsFolderPath / "heads";
+    fs::path HEADFilePath = pitFolderPath / "HEAD";
+    fs::path indexFilePath = pitFolderPath / "index";
 
     Repository()
     {
@@ -20,7 +26,6 @@ public:
     {
         try
         {
-
             if (!exists(pitFolderPath))
             {
                 // Directories
@@ -63,8 +68,42 @@ public:
         }
         return false;
     }
+    
 
-    void storeObject()
+    void storeObject(GitObject gitObj )
     {
+        string objHash = gitObj.getHash(); // 
+        fs::path objectDirPath = objectsFolderPath / objHash.substr(0,2);
+        
+        string objectName = objHash.substr(2);
+        fs::path objectFilePath = objectDirPath / objectName;
+        try
+        {
+            if(!exists(objectDirPath))
+            {
+                fs::create_directory(objectDirPath);
+                ofstream objectFile(objectFilePath);
+                if(objectFile.is_open())
+                {
+                    objectFile << gitObj.contents;
+                }
+                objectFile.close();
+            }
+        }
+        catch(const exception &e)
+        {
+            cout << "Error: " << e.what() << endl;
+        }
+        catch(...)
+        {
+            cout << "There is an error in storing object(s)." << endl;
+        }
     }
+
+
 };
+
+
+
+
+#endif

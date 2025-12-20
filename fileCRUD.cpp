@@ -1,3 +1,5 @@
+#ifndef FILECRUD_H
+#define FILECRUD_H
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -22,3 +24,7 @@ void writeFileWithString(const string &fileName, const string &content)
     file << content;
     file.close();
 }
+
+
+
+#endif

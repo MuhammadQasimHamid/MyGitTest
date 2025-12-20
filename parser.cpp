@@ -1,3 +1,5 @@
+#ifndef PARSER
+#define PARSER
 #include<vector>
 #include<iostream>
 #include<sstream>
@@ -14,3 +16,5 @@ vector<string> split(string str, char ch)
     }
     return parts;
 }
+
+#endif

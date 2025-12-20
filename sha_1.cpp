@@ -1,5 +1,5 @@
-#ifndef sha_1
-#define sha_1
+#ifndef SHA_H
+#define SHA_H
 
 #include <iostream>
 #include <iomanip>
