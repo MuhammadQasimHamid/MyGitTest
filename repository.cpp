@@ -9,6 +9,31 @@
 using namespace std::filesystem;
 using namespace std;
 namespace fs = filesystem;
+
+struct  indexEntry
+{
+    string mode;
+    string hash;
+    string offset;
+    string path;
+    indexEntry(string mode, string hash, string offset, string path)
+    {
+        this->mode = mode;
+        this->hash = hash;
+        this->offset = offset;
+        this->path = path;
+    }
+    void fill(string &mode, string &hash, string &offset, string &path)
+    {
+        mode = this->mode;
+        hash = this->hash;
+        offset = this->offset;
+        path = this->path;
+    }
+};
+
+
+
 class Repository
 {
 public:
@@ -111,8 +136,43 @@ public:
         return "DETACHED HEAD";
     }
 
-    void addFileToIndex(path filePath)
+    bool addFileToIndex(path filePath)
     {
+        vector<indexEntry> indexEntries = loadIndexEntries();
+        for(auto iE:indexEntries)
+        {
+            if(iE.path == filePath)
+            {
+                // cout << "File Already Added" << endl;
+                return false;
+            }
+        }
+        indexEntries.push_back(indexEntry("10002","","0",filePath.string()));
+        return true;
+    }
+    vector<indexEntry> loadIndexEntries()
+    {
+        string indexFileContents = readFile(indexFilePath); 
+        vector<string> lines = split(indexFileContents,'\n') ;
+        vector<indexEntry> indexEntries (lines.size()); 
+        for(auto l:lines)
+        {
+            vector<string> parts = split(l,' ');
+            indexEntry iE(parts[0],parts[1],parts[2],parts[3]);
+            indexEntries.push_back(iE);
+        }
+        return indexEntries;
+    }
+    void saveIndexEntries(vector<indexEntry> indexEntires)
+    {
+        string mode,hash,offset,filepath;
+        string indexFileContents = "";
+        for(auto iE:indexEntires)
+        {
+            iE.fill(mode,hash,offset,filepath);
+            indexFileContents += mode + " " + hash + " " + offset + " " + filepath + "\n";
+        }
+        writeFile(indexFilePath,indexFileContents);
     }
 };
 
