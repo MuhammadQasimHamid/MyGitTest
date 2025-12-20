@@ -1,3 +1,5 @@
+#ifndef ADD_H
+#define ADD_H
 #include<iostream>
 using namespace std;
 
@@ -13,3 +15,5 @@ void addCommandExe(int argc, char* argv[])
         cout << "Invalid Params" << endl;
     }
 }
+
+#endif

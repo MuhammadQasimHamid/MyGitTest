@@ -4,6 +4,7 @@
 #include "init.cpp"
 #include "add.cpp"
 #include "commit.cpp"
+#include "status.cpp"
 using namespace std;
 
 typedef void (*cmdFunc)(int argc, char *argv[]);
@@ -13,7 +14,7 @@ void initCommandExe(int argc, char *argv[]);
 void addCommandExe(int argc, char *argv[]);
 void helpCommandExe(int argc, char *argv[]);
 void commitCommandExe(int argc, char *argv[]);
-
+void statusCommandExe(int argc, char *argv[]); 
 map<string, cmdFunc> cmdCodes;
 
 void callFunc(int argc, char *argv[]);
@@ -23,6 +24,7 @@ void loadConfiguraion()
     cmdCodes["add"] = addCommandExe;
     cmdCodes["--help"] = helpCommandExe;
     cmdCodes["commit"] = commitCommandExe;
+    cmdCodes["status"] = statusCommandExe;
 }
 main(int argc, char *argv[])
 {

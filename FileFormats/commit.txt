@@ -1,6 +1,7 @@
 Commit Syntax:
 tree hash
 parent hash
+parent hash
 author Name <email> timestamp
 committer Name <email> timestamp
 
@@ -9,6 +10,7 @@ message
 Example:
 tree 0d0f4f1916505df8d33107fa08321db3d0cc4bae
 parent 3ca359c325a3bc17fdfcdd06a59c219b8da1f0bf
+parent 3ca359c325a3bc17fdfcdd06a59c219234a1f0bf
 author UmarRana2005 <umerrana2k05@gmail.com> 1766055481 +0500
 committer UmarRana2005 <umerrana2k05@gmail.com> 1766055481 +0500
 
