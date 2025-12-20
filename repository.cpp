@@ -83,10 +83,8 @@ public:
             {
 
                 create_directory(objectDirPath);
-                // writeFileWithBytes(objectFilePath.generic_string(), gitObj.serialize());
-                writeFile(objectFilePath.generic_string(), gitObj.contents);
+                writeFile(objectFilePath, gitObj.contents);
             }
-
         }
         catch (const exception &e)
         {

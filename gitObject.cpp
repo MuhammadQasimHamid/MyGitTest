@@ -5,10 +5,8 @@
 #include <vector>
 #include <string>
 #include <iomanip>
-// #include <openssl/sha.h>
 #include "sha_1.cpp"
 #include "parser.cpp"
-#include "compress.cpp"
 using namespace std;
 
 enum GitObjectType
@@ -73,11 +71,11 @@ public:
         return hash;
     }
 
-    vector<unsigned char> serialize()
+    string serialize()
     {
         string header = to_string(objectType) + " " + to_string(contents.size()) + "\0";
         string headerContent = header + contents;
-        return compress_git_object(headerContent);
+        return headerContent;
     }
 };
 
@@ -171,9 +169,5 @@ class TreeObject : GitObject
         entires.push_back(entry);
     }
 };
-
-
-
-
 
 #endif
