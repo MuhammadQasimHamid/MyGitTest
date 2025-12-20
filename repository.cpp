@@ -82,8 +82,9 @@ public:
             if (!exists(objectDirPath))
             {
                 fs::create_directory(objectDirPath);
-                writeFileWithBytes(objectFilePath.c_str(), gitObj.serialize());
+                writeFileWithBytes(objectFilePath.generic_string(), gitObj.serialize());
             }
+
         }
         catch (const exception &e)
         {

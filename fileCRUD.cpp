@@ -7,18 +7,9 @@
 #include <stdexcept>
 #include <filesystem>
 using namespace std;
-void makeFile(const string &fileName)
-{
-    ofstream file(fileName);
-    if (!file.is_open())
-    {
-        throw runtime_error("Error: Could not open the file.");
-    }
-}
 
-void writeFileWithString(const filesystem::path &filePath, const string &content)
+void writeFile(const filesystem::path &filePath, const string &content = "")
 {
-
     ofstream file(filePath);
     if (!file.is_open())
     {
@@ -27,6 +18,7 @@ void writeFileWithString(const filesystem::path &filePath, const string &content
     file << content;
     file.close();
 }
+
 
 string readFile(const filesystem::path &filePath)
 {
