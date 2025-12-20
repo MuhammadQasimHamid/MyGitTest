@@ -4,6 +4,7 @@ using namespace std;
 
 void initCommandExe(int argc, char *argv[])
 {
-    Repository R;
-    R.initRepo();
+    Repository repo;
+    if (!repo.initRepo())
+        cout << "Repository Already exist.";
 }

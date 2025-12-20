@@ -69,6 +69,10 @@ public:
         string hash = sha1(store);
         return hash;
     }
+
+    // string serialize()
+    // {
+    // }
 };
 
 class BlobObject : GitObject

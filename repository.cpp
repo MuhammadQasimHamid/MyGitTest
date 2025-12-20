@@ -1,15 +1,18 @@
 #include <iostream>
-#include "makeDirectory.cpp"
-#include "fileCRUD.cpp"
-using namespace std;
-
-namespace fs = filesystem;
-// using namespace std;
-// namespace fs = std::filesystem;
+#include <fstream>
+#include <filesystem>
+using namespace std::filesystem;
 class Repository
 {
 public:
-    string path = "";
+    path project_absolute = absolute(".");
+    path pitFolderPath = project_absolute / ".pit";
+    path objectsFolderPath = pitFolderPath / "objects";
+    path refsFolderPath = pitFolderPath / "refs";
+    path refsHeadFolderPath = refsFolderPath / "heads";
+    path HEADFilePath = pitFolderPath / "HEAD";
+    path indexFilePath = pitFolderPath / "index";
+
     Repository()
     {
     }
@@ -17,25 +20,37 @@ public:
     {
         try
         {
-            // Directories
-            makeDirectory(".pit");
-            // .git/objects
-            makeDirectory(".pit/objects");
-            // .git/refs
-            makeDirectory(".pit/refs");
-            // .git/refs/heads
-            makeDirectory(".pit/refs/heads");
 
-            // Files
-            //  .git/HEAD
-            makeFile(".pit/HEAD"); // this file stores pointer to branches
-            // .git/index
-            makeFile(".pit/index");
+            if (!exists(pitFolderPath))
+            {
+                // Directories
+                create_directory(pitFolderPath);
+                // .git/objects
+                create_directory(objectsFolderPath);
+                // .git/refs
+                create_directory(refsFolderPath);
+                // .git/refs/heads
+                create_directory(refsHeadFolderPath);
 
-            // stores current branch in /HEAD
-            writeFile(".pit/HEAD", "ref: refs/heads/main\n");
+                // Files
+                //  .git/HEAD
+                ofstream headFile(HEADFilePath); // this file stores pointer to branches
+                if (headFile.is_open())
+                {
+                    // stores current branch in /HEAD
+                    headFile << "ref: refs/heads/main\n";
+                }
+                headFile.close();
+                // .git/index
+                ofstream indexFile(indexFilePath);
+                indexFile.close();
+            }
+            else
+            {
+                throw runtime_error("Already pit has initialized in current directory.");
+            }
 
-            cout << "Initialized empty git repository." << endl;
+            cout << "Initialized empty pit repository." << endl;
             return true;
         }
         catch (const exception &e)
@@ -47,5 +62,9 @@ public:
             cerr << "Their is any error occurs during creating repository." << endl;
         }
         return false;
+    }
+
+    void storeObject()
+    {
     }
 };

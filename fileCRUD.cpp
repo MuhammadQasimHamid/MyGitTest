@@ -12,13 +12,13 @@ void makeFile(const string &fileName)
     }
 }
 
-void writeFile(const string &fileName, const string &content)
+void writeFileWithString(const string &fileName, const string &content)
 {
     ofstream file(fileName);
     if (!file.is_open())
     {
         throw runtime_error(string("Failed to create File: ") + fileName);
     }
-    file << content << endl;
+    file << content;
     file.close();
 }
