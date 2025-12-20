@@ -7,6 +7,7 @@
 #include <stdexcept>
 #include <filesystem>
 using namespace std;
+
 void makeFile(const string &fileName)
 {
     ofstream file(fileName);

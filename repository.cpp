@@ -12,13 +12,13 @@ namespace fs = filesystem;
 class Repository
 {
 public:
-    fs::path project_absolute = fs::absolute(".");
-    fs::path pitFolderPath = project_absolute / ".pit";
-    fs::path objectsFolderPath = pitFolderPath / "objects";
-    fs::path refsFolderPath = pitFolderPath / "refs";
-    fs::path refsHeadFolderPath = refsFolderPath / "heads";
-    fs::path HEADFilePath = pitFolderPath / "HEAD";
-    fs::path indexFilePath = pitFolderPath / "index";
+    path project_absolute = absolute(".");
+    path pitFolderPath = project_absolute / ".pit";
+    path objectsFolderPath = pitFolderPath / "objects";
+    path refsFolderPath = pitFolderPath / "refs";
+    path refsHeadFolderPath = refsFolderPath / "heads";
+    path HEADFilePath = pitFolderPath / "HEAD";
+    path indexFilePath = pitFolderPath / "index";
 
     Repository()
     {
@@ -73,16 +73,17 @@ public:
     void storeObject(GitObject gitObj)
     {
         string objHash = gitObj.getHash(); //
-        fs::path objectDirPath = objectsFolderPath / objHash.substr(0, 2);
+        path objectDirPath = objectsFolderPath / objHash.substr(0, 2);
 
         string objectName = objHash.substr(2);
-        fs::path objectFilePath = objectDirPath / objectName;
+        path objectFilePath = objectDirPath / objectName;
         try
         {
             if (!exists(objectDirPath))
             {
-                fs::create_directory(objectDirPath);
-                writeFileWithBytes(objectFilePath.c_str(), gitObj.serialize());
+                create_directory(objectDirPath);
+                // writeFileWithBytes(objectFilePath.generic_string(), gitObj.serialize());
+                writeFileWithString(objectFilePath.generic_string(), gitObj.contents);
             }
         }
         catch (const exception &e)
@@ -104,13 +105,13 @@ public:
             // stores current branch in /HEAD
             getline(headFile, line);
             vector<string> parts = split(line, ' ');
-            fs::path refPath = parts[1];
+            path refPath = parts[1];
             return refPath.filename().string();
         }
         return "DETACHED HEAD";
     }
 
-    void addFileToIndex(fs::path filePath)
+    void addFileToIndex(path filePath)
     {
     }
 };
