@@ -22,19 +22,24 @@ struct indexEntry
 class StagingIndex
 {
 public:
-    vector<indexEntry> indexEntries;
-    path indexFilePath;
-    StagingIndex(const path &indexFilePath)
+    static vector<indexEntry> indexEntries;
+    static path indexFilePath;
+    // StagingIndex(const path &indexFilePath)
+    // {
+    //     StagingIndex::indexFilePath = indexFilePath;
+    //     load();
+    // }
+    static void InitializeClass(const path &indexFilePath)
     {
-        this->indexFilePath = indexFilePath;
+        StagingIndex::indexFilePath = indexFilePath;
         load();
     }
 
-    void addEntry(const indexEntry &entry)
+    static void addEntry(const indexEntry &entry)
     {
-        this->indexEntries.push_back(entry);
+        StagingIndex::indexEntries.push_back(entry);
     }
-    void updateEntry(const path &filePath, const string &newHash, const string &newMode)
+    static void updateEntry(const path &filePath, const string &newHash, const string &newMode)
     {
         indexEntry *entry = getEntry(filePath);
         if (!entry)
@@ -43,10 +48,10 @@ public:
         entry->hash = newHash;
         entry->mode = newMode;
     }
-    void load()
+    static void load()
     {
-        this->indexEntries = {};
-        string indexFileContents = readFile(this->indexFilePath);
+        StagingIndex::indexEntries = {};
+        string indexFileContents = readFile(StagingIndex::indexFilePath);
         vector<string> lines = split(indexFileContents, '\n');
         for (auto l : lines)
         {
@@ -56,23 +61,23 @@ public:
             if (parts.size() == 4)
             {
                 indexEntry iE(parts[0], parts[1], parts[2], parts[3]);
-                this->indexEntries.push_back(iE);
+                StagingIndex::indexEntries.push_back(iE);
             }
         }
     }
-    void save()
+    static void save()
     {
         string indexFileContents = "";
-        for (const auto &iE : this->indexEntries)
+        for (const auto &iE : indexEntries)
         {
             indexFileContents += iE.mode + " " + iE.hash + " " + iE.offset + " " + iE.path + "\n";
         }
-        writeFile(this->indexFilePath, indexFileContents);
+        writeFile(indexFilePath, indexFileContents);
     }
 
-    bool isTrackedFile(const path &filePath)
+    static bool isTrackedFile(const path &filePath)
     {
-        for (const auto &iE : this->indexEntries)
+        for (const auto &iE : indexEntries)
         {
             if (iE.path == filePath.generic_string())
             {
@@ -82,9 +87,9 @@ public:
         return false;
     }
 
-    indexEntry *getEntry(const path &filePath)
+    static indexEntry *getEntry(const path &filePath)
     {
-        for (auto &iE : this->indexEntries)
+        for (auto &iE : indexEntries)
         {
             if (iE.path == filePath.generic_string())
             {

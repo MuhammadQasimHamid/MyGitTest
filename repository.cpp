@@ -14,19 +14,29 @@ namespace fs = filesystem;
 class Repository
 {
 public:
-    path project_absolute = absolute(".");
-    path pitFolderPath = project_absolute / ".pit";
-    path objectsFolderPath = pitFolderPath / "objects";
-    path refsFolderPath = pitFolderPath / "refs";
-    path refsHeadFolderPath = refsFolderPath / "heads";
-    path HEADFilePath = pitFolderPath / "HEAD";
-    path indexFilePath = pitFolderPath / "index";
-    StagingIndex index = StagingIndex(this->indexFilePath);
+    static path project_absolute;
+    static path pitFolderPath;
+    static path objectsFolderPath;
+    static path refsFolderPath;
+    static path refsHeadFolderPath;
+    static path HEADFilePath;
+    static path indexFilePath;
 
     Repository()
     {
     }
-    bool initRepo() // returns true if repo initialized successfully
+    static void InitializeClass()
+    {
+        project_absolute = absolute(".");
+        pitFolderPath = project_absolute / ".pit";
+        objectsFolderPath = pitFolderPath / "objects";
+        refsFolderPath = pitFolderPath / "refs";
+        refsHeadFolderPath = refsFolderPath / "heads";
+        HEADFilePath = pitFolderPath / "HEAD";
+        indexFilePath = pitFolderPath / "StagingIndex::";
+        StagingIndex::InitializeClass(Repository::indexFilePath);
+    }
+    static bool initRepo() // returns true if repo initialized successfully
     {
         try
         {
@@ -50,7 +60,7 @@ public:
                     headFile << "ref: refs/heads/main\n";
                 }
                 headFile.close();
-                // .git/index
+                // .git/StagingIndex::
                 ofstream indexFile(indexFilePath);
                 indexFile.close();
             }
@@ -73,7 +83,7 @@ public:
         return false;
     }
 
-    void storeObject(GitObject gitObj)
+    static void storeObject(GitObject gitObj)
     {
         string objHash = gitObj.getHash(); //
         path objectDirPath = objectsFolderPath / objHash.substr(0, 2);
@@ -99,7 +109,7 @@ public:
         }
     }
 
-    string currentBranch()
+    static string currentBranch()
     {
         string line;
         fstream headFile(HEADFilePath, ios::in); // this file stores pointer to branches
@@ -114,7 +124,7 @@ public:
         return "DETACHED HEAD";
     }
 
-    bool addFileToIndex(const path &filePath)
+    static bool addFileToIndex(const path &filePath)
     {
         if (!exists(filePath) || !is_regular_file(filePath))
         {
@@ -122,22 +132,23 @@ public:
             return false;
         }
 
-        path relPath = relative(absolute(filePath), this->project_absolute);
+        path relPath = relative(absolute(filePath), project_absolute);
         string fileContents = readFile(filePath);
         GitObject blobObject = GitObject(Blob, fileContents);
         string hash = blobObject.getHash();
         string serializeBlobObject = blobObject.serialize();
+
         storeObject(blobObject);
 
-        if (index.isTrackedFile(relPath))
+        if (StagingIndex::isTrackedFile(relPath))
         {
-            index.updateEntry(relPath, hash, "100644");
-            index.save();
+            StagingIndex::updateEntry(relPath, hash, "100644");
+            StagingIndex::save();
             return true;
         }
         indexEntry iE("100644", hash, "0", relPath.generic_string());
-        index.addEntry(iE);
-        index.save();
+        StagingIndex::addEntry(iE);
+        StagingIndex::save();
         return true;
     }
 };

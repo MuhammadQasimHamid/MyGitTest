@@ -8,8 +8,7 @@ void addCommandExe(int argc, char* argv[])
 {
     if(argc == 3)
     {
-        Repository R;
-        if(!R.addFileToIndex(argv[2]))
+        if(!Repository::addFileToIndex(argv[2]))
         {
             cout << "Alreaduy" <<endl;
         }

@@ -25,6 +25,7 @@ void loadConfiguraion()
     cmdCodes["--help"] = helpCommandExe;
     cmdCodes["commit"] = commitCommandExe;
     cmdCodes["status"] = statusCommandExe;
+    Repository::InitializeClass();
 }
 main(int argc, char *argv[])
 {

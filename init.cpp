@@ -7,12 +7,12 @@ using namespace std;
 
 void initCommandExe(int argc, char *argv[])
 {
-    Repository repo;
-    if (!repo.initRepo())
+    
+    if (!Repository::initRepo())
         cout << "Repository Already exist.";
 
-    repo.addFileToIndex("init.cpp");
-    repo.addFileToIndex("add.cpp");
+    Repository::addFileToIndex("init.cpp");
+    Repository::addFileToIndex("add.cpp");
 }
 
 #endif
