@@ -13,11 +13,12 @@ using namespace std;
 typedef void (*cmdFunc)(int argc, char *argv[]);
 
 // command functions
-// void initCommandExe(int argc, char *argv[]);
-// void addCommandExe(int argc, char *argv[]);
-// void helpCommandExe(int argc, char *argv[]);
-// void commitCommandExe(int argc, char *argv[]);
-// void statusCommandExe(int argc, char *argv[]); 
+void initCommandExe(int argc, char *argv[]);
+void addCommandExe(int argc, char *argv[]);
+void helpCommandExe(int argc, char *argv[]);
+void commitCommandExe(int argc, char *argv[]);
+void statusCommandExe(int argc, char *argv[]); 
+void checkoutCommandExe(int argc, char *argv[]); 
 map<string, cmdFunc> cmdCodes;
 
 void callFunc(int argc, char *argv[]);
@@ -29,6 +30,7 @@ void loadConfiguraion()
     cmdCodes["--help"] = helpCommandExe;
     cmdCodes["commit"] = commitCommandExe;
     cmdCodes["status"] = statusCommandExe;
+    cmdCodes["checkout"] = checkoutCommandExe;
     Repository::InitializeClass();
 }
 int main(int argc, char *argv[])
