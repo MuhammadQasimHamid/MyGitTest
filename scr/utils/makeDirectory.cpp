@@ -1,6 +1,4 @@
-#ifndef MAKEDIRECTORY_H
-#define MAKEDIRECTORY_H
-
+#include "makeDirectory.h"
 #include <iostream>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -26,6 +24,3 @@ void makeDirectory(const char *dirName)
     }
     return;
 }
-
-
-#endif

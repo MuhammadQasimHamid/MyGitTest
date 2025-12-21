@@ -1,0 +1,9 @@
+
+#ifndef COMMIT_H
+#define COMMIT_H
+#include <iostream>
+// using namespace std; don't write in .h files
+
+void commitCommandExe(int argc, char *argv[]);
+
+#endif

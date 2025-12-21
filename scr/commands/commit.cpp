@@ -1,8 +1,6 @@
-
-#ifndef COMMIT_H
-#define COMMIT_H
+#include "commit.h"
 #include <iostream>
-#include "gitObject.cpp"
+#include "gitObject.h"
 using namespace std;
 
 void commitCommandExe(int argc, char *argv[])
@@ -11,5 +9,3 @@ void commitCommandExe(int argc, char *argv[])
     cout << "here is hash of my name" << endl;
     cout << gitObj.getHash() << endl;
 }
-
-#endif

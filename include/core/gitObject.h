@@ -1,0 +1,96 @@
+#ifndef GITOBJECT_H
+#define GITOBJECT_H
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <string>
+#include <iomanip>
+#include "include/utils/sha_1.h"
+#include "parser.h"
+using namespace std;
+
+enum GitObjectType
+{
+    Blob,
+    Tree,
+    Commit,
+    Tag,
+    Nothing
+};
+GitObjectType stoGitObjectType(string str);
+
+struct treeEntry
+{
+    string mode;
+    GitObjectType type;
+    string hash;
+    string name;
+    treeEntry(string mode, GitObjectType type, string hash, string name)
+    {
+        this->mode = mode;
+        this->type = type;
+        this->hash = hash;
+        this->name = name;
+    }
+    void fill(string &mode, GitObjectType &type, string &hash, string &name)
+    {
+        mode = this->mode;
+        type = this->type;
+        hash = this->hash;
+        name = this->name;
+    }
+};
+
+class GitObject
+{
+protected:
+public:
+    GitObjectType objectType;
+    string contents;
+    GitObject() {}
+
+    GitObject(GitObjectType objType, string contents);
+
+    GitObject(string serializedObject); // deserialize object
+
+    string getHash();
+
+    string serialize();
+};
+
+class BlobObject : GitObject
+{
+public:
+    BlobObject(string filename, string contents);
+    BlobObject(string serializedObject);
+};
+
+class CommitObject : GitObject
+{
+public:
+    string treeHash;
+    vector<string> parentHash;
+    string author;
+    string message;
+    string timeStamp;
+    CommitObject(string treeHash, vector<string> parentHash, string author, string message, string timeStamp);
+
+    CommitObject(string serializedObject); // desterilize contents
+
+    string serializeContent();
+    
+};
+
+class TreeObject : GitObject
+{
+    vector<treeEntry> entires;
+    TreeObject();
+    TreeObject(string serilizedObject);  // desterilieze (contents to TreeObject)
+    
+    string serializeContent();
+    
+    void addEntry(treeEntry entry);
+    
+};
+
+#endif

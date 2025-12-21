@@ -1,5 +1,4 @@
-#ifndef FILECRUD_H
-#define FILECRUD_H
+#include "fileCRUD.h"
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -50,5 +49,3 @@ void writeFileWithBytes(const string &path, const vector<unsigned char> &data)
     file.write(reinterpret_cast<const char *>(data.data()), data.size());
     file.close();
 }
-
-#endif/

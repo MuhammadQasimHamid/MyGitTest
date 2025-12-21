@@ -1,0 +1,8 @@
+#ifndef ADD_H
+#define ADD_H
+#include<iostream>
+// using namespace std; don't write in .h files
+
+void addCommandExe(int argc, char* argv[]);
+
+#endif

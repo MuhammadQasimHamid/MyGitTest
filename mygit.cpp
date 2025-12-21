@@ -1,10 +1,13 @@
 #include <iostream>
 #include <map>
-#include "help.cpp"
-#include "init.cpp"
-#include "add.cpp"
-#include "commit.cpp"
-#include "status.cpp"
+#include "include/commands/help.h"
+#include "include/commands/init.h"
+#include "include/commands/add.h"
+#include "include/commands/commit.h"
+#include "include/commands/status.h"
+#include "include/core/repository.h"
+#include "include/core/StagingIndex.h"
+
 using namespace std;
 
 typedef void (*cmdFunc)(int argc, char *argv[]);
@@ -18,6 +21,7 @@ void statusCommandExe(int argc, char *argv[]);
 map<string, cmdFunc> cmdCodes;
 
 void callFunc(int argc, char *argv[]);
+bool mygitRepoExists(); 
 void loadConfiguraion()
 {
     cmdCodes["init"] = initCommandExe;
@@ -46,5 +50,22 @@ void callFunc(int argc, char *argv[])
         cout << "Invalid Command" << endl;
         return;
     }
-    cmdCodes[cmdStr](argc, argv);
+    if(mygitRepoExists() || cmdStr == "init")
+    {
+        cmdCodes[cmdStr](argc, argv);
+    }
+    else
+    {   
+        cout << "Pit repo not exists in this directory..." <<endl;
+        cout << "(Type: 'pit init' to initialize pit repo)." << endl;
+    }
+}
+
+bool mygitRepoExists()
+{
+    if(exists(".pit"))
+    {
+        return true;
+    }
+    return false;
 }

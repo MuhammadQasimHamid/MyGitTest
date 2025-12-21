@@ -1,0 +1,12 @@
+#ifndef COMPRESS_H
+#define COMPRESS_H
+#include <iostream>
+#include <vector>
+#include <string>
+#include <zlib.h>
+
+std::vector<unsigned char> compress_git_object(const std::string &data);
+
+
+
+#endif

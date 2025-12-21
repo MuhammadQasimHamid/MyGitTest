@@ -1,8 +1,6 @@
-#ifndef INIT_H
-#define INIT_H
-
+#include "init.h"
 #include <iostream>
-#include "repository.cpp"
+#include "repository.h"
 using namespace std;
 
 void initCommandExe(int argc, char *argv[])
@@ -10,9 +8,4 @@ void initCommandExe(int argc, char *argv[])
     
     if (!Repository::initRepo())
         cout << "Repository Already exist.";
-
-    Repository::addFileToIndex("init.cpp");
-    Repository::addFileToIndex("add.cpp");
 }
-
-#endif
