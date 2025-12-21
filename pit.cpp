@@ -22,7 +22,7 @@ void checkoutCommandExe(int argc, char *argv[]);
 map<string, cmdFunc> cmdCodes;
 
 void callFunc(int argc, char *argv[]);
-bool mygitRepoExists(); 
+bool pitRepoExists(); 
 void loadConfiguraion()
 {
     cmdCodes["init"] = initCommandExe;
@@ -52,7 +52,7 @@ void callFunc(int argc, char *argv[])
         cout << "Invalid Command" << endl;
         return;
     }
-    if(mygitRepoExists() || cmdStr == "init")
+    if(pitRepoExists() || cmdStr == "init")
     {
         cmdCodes[cmdStr](argc, argv);
     }
@@ -63,7 +63,7 @@ void callFunc(int argc, char *argv[])
     }
 }
 
-bool mygitRepoExists()
+bool pitRepoExists()
 {
     if(exists(".pit"))
     {
