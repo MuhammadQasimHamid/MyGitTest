@@ -91,11 +91,11 @@ bool StagingIndex::addFileToIndex(const path &filePath)
 
     path relPath = relative(absolute(filePath), Repository::project_absolute);
     string fileContents = readFile(filePath);
-    GitObject blobObject = GitObject(Blob, fileContents);
-    string hash = blobObject.getHash();
-    string serializeBlobObject = blobObject.serialize();
+    BlobObject blobObj = BlobObject(filePath.filename().string(),fileContents);
+    string hash = blobObj.getHash();
+    string serializeBlobObject = blobObj.serialize();
 
-    Repository::storeObject(blobObject);
+    Repository::storeObject(blobObj);
 
     if (isTrackedFile(relPath))
     {

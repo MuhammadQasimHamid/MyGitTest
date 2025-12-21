@@ -43,7 +43,6 @@ struct treeEntry
 
 class GitObject
 {
-protected:
 public:
     GitObjectType objectType;
     string contents;
@@ -58,14 +57,14 @@ public:
     string serialize();
 };
 
-class BlobObject : GitObject
+class BlobObject : public GitObject
 {
 public:
     BlobObject(string filename, string contents);
     BlobObject(string serializedObject);
 };
 
-class CommitObject : GitObject
+class CommitObject : public GitObject
 {
 public:
     string treeHash;
@@ -81,7 +80,7 @@ public:
     
 };
 
-class TreeObject : GitObject
+class TreeObject :  public GitObject
 {
     vector<treeEntry> entires;
     TreeObject();
