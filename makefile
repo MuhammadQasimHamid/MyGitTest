@@ -16,19 +16,19 @@ UTILS = $(SRC_DIR)/utils
 SRC_COMMANDS = $(wildcard $(COMMANDS)/*.cpp)
 SRC_CORE = $(wildcard $(CORE)/*.cpp)
 SRC_UTILS = $(wildcard $(UTILS)/*.cpp)
-SRC_MAIN = mygit.cpp
+SRC_MAIN = pit.cpp
 
 # Object files
 OBJ_COMMANDS = $(patsubst $(SRC_DIR)/%, $(OBJ_DIR)/%, $(SRC_COMMANDS:.cpp=.o))
 OBJ_CORE = $(patsubst $(SRC_DIR)/%, $(OBJ_DIR)/%, $(SRC_CORE:.cpp=.o))
 OBJ_UTILS = $(patsubst $(SRC_DIR)/%, $(OBJ_DIR)/%, $(SRC_UTILS:.cpp=.o))
-OBJ_MAIN = $(OBJ_DIR)/mygit.o
+OBJ_MAIN = $(OBJ_DIR)/pit.o
 
 # All objects
 OBJS = $(OBJ_COMMANDS) $(OBJ_CORE) $(OBJ_UTILS) $(OBJ_MAIN)
 
 # Output executable
-TARGET = $(BIN_DIR)/mygit
+TARGET = $(BIN_DIR)/pit
 
 # Default target
 all: $(TARGET)
@@ -38,8 +38,8 @@ $(TARGET): $(OBJS)
 	@mkdir -p $(BIN_DIR)
 	$(CXX) $(CXXFLAGS) -o $@ $^ -lz -lcrypto
 
-# Compile main source (mygit.cpp)
-$(OBJ_DIR)/mygit.o: mygit.cpp
+# Compile main source (pit.cpp)
+$(OBJ_DIR)/pit.o: pit.cpp
 	@mkdir -p $(OBJ_DIR)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
@@ -50,4 +50,4 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 
 # Clean build files
 clean:
-	rm -rf $(OBJ_DIR)/*.o $(BIN_DIR)/mygit
+	rm -rf $(OBJ_DIR)/*.o $(BIN_DIR)/pit
