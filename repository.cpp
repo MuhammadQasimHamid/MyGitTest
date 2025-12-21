@@ -6,31 +6,10 @@
 #include <filesystem>
 #include "gitObject.cpp"
 #include "fileCRUD.cpp"
+#include "StagingIndex.cpp"
 using namespace std::filesystem;
 using namespace std;
 namespace fs = filesystem;
-
-struct indexEntry
-{
-    string mode;
-    string hash;
-    string offset;
-    string path;
-    indexEntry(string mode, string hash, string offset, string path)
-    {
-        this->mode = mode;
-        this->hash = hash;
-        this->offset = offset;
-        this->path = path;
-    }
-    void fill(string &mode, string &hash, string &offset, string &path)
-    {
-        mode = this->mode;
-        hash = this->hash;
-        offset = this->offset;
-        path = this->path;
-    }
-};
 
 class Repository
 {
@@ -42,6 +21,7 @@ public:
     path refsHeadFolderPath = refsFolderPath / "heads";
     path HEADFilePath = pitFolderPath / "HEAD";
     path indexFilePath = pitFolderPath / "index";
+    StagingIndex index = StagingIndex(this->indexFilePath);
 
     Repository()
     {
@@ -134,58 +114,31 @@ public:
         return "DETACHED HEAD";
     }
 
-    bool addFileToIndex(path filePath)
+    bool addFileToIndex(const path &filePath)
     {
-        vector<indexEntry> indexEntries = loadIndexEntries();
-        for (auto iE : indexEntries)
+        if (!exists(filePath) || !is_regular_file(filePath))
         {
-            if (iE.path == filePath)
-            {
-                // cout << "File Already Added" << endl;
-                return false;
-            }
-        }
-        string fileContents = readFile(filePath);
-        if (!exists(filePath))
-        {
-            cout << "File not exists" << endl;
+            cout << "Invalid file" << endl;
             return false;
         }
-        BlobObject B(filePath.filename().string(), fileContents);
-        indexEntry iE("100644", "hash", "0", filePath.string());
-        indexEntries.push_back(iE);
-        // cout << "index entries" << indexEntries.size() << endl;
-        saveIndexEntries(indexEntries);
+
+        path relPath = relative(absolute(filePath), this->project_absolute);
+        string fileContents = readFile(filePath);
+        GitObject blobObject = GitObject(Blob, fileContents);
+        string hash = blobObject.getHash();
+        string serializeBlobObject = blobObject.serialize();
+        storeObject(blobObject);
+
+        if (index.isTrackedFile(relPath))
+        {
+            index.updateEntry(relPath, hash, "100644");
+            index.save();
+            return true;
+        }
+        indexEntry iE("100644", hash, "0", relPath.generic_string());
+        index.addEntry(iE);
+        index.save();
         return true;
-    }
-    vector<indexEntry> loadIndexEntries()
-    {
-        string indexFileContents = readFile(indexFilePath);
-        cout << "readed: " << indexFileContents;
-        vector<string> lines = split(indexFileContents, '\n');
-        vector<indexEntry> indexEntries;
-        for (auto l : lines)
-        {
-            vector<string> parts = split(l, ' ');
-            if (parts.size() == 4)
-            {
-                indexEntry iE(parts[0], parts[1], parts[2], parts[3]);
-                indexEntries.push_back(iE);
-            }
-        }
-        // cout << "index entries" << indexEntries.size() << endl;
-        return indexEntries;
-    }
-    void saveIndexEntries(vector<indexEntry> indexEntires)
-    {
-        string mode, hash, offset, filepath;
-        string indexFileContents = "";
-        for (auto iE : indexEntires)
-        {
-            iE.fill(mode, hash, offset, filepath);
-            indexFileContents += mode + " " + hash + " " + offset + " " + filepath + "\n";
-        }
-        writeFile(indexFilePath, indexFileContents);
     }
 };
 
