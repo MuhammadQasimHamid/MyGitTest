@@ -1,23 +1,23 @@
 #include <iostream>
 #include <map>
-#include "include/commands/help.h"
-#include "include/commands/init.h"
-#include "include/commands/add.h"
-#include "include/commands/commit.h"
-#include "include/commands/status.h"
-#include "include/core/repository.h"
-#include "include/core/StagingIndex.h"
+#include "commands/help.h"
+#include "commands/init.h"
+#include "commands/add.h"
+#include "commands/commit.h"
+#include "commands/status.h"
+#include "core/repository.h"
+#include "core/StagingIndex.h"
 
 using namespace std;
 
 typedef void (*cmdFunc)(int argc, char *argv[]);
 
 // command functions
-void initCommandExe(int argc, char *argv[]);
-void addCommandExe(int argc, char *argv[]);
-void helpCommandExe(int argc, char *argv[]);
-void commitCommandExe(int argc, char *argv[]);
-void statusCommandExe(int argc, char *argv[]); 
+// void initCommandExe(int argc, char *argv[]);
+// void addCommandExe(int argc, char *argv[]);
+// void helpCommandExe(int argc, char *argv[]);
+// void commitCommandExe(int argc, char *argv[]);
+// void statusCommandExe(int argc, char *argv[]); 
 map<string, cmdFunc> cmdCodes;
 
 void callFunc(int argc, char *argv[]);
@@ -31,7 +31,7 @@ void loadConfiguraion()
     cmdCodes["status"] = statusCommandExe;
     Repository::InitializeClass();
 }
-main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
     loadConfiguraion();
     cout << "Pit Refreshed" << endl;

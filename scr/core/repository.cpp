@@ -1,17 +1,28 @@
-#include "repository.h"
+#include "core/repository.h"
 #include <iostream>
 #include <fstream>
 #include <filesystem>
-#include "gitObject.h"
-#include "fileCRUD.h"
-#include "StagingIndex.h"
-#include "myparser.h"
+#include "core/gitObject.h"
+#include "core/StagingIndex.h"
+#include "utils/fileCRUD.h"
+#include "utils/myparser.h"
+#include "utils/mysha1.h"
 
 using namespace std::filesystem;
 using namespace std;
 namespace fs = filesystem;
 
+
 #pragma region Repository
+fs::path Repository::project_absolute;
+fs::path Repository::pitFolderPath;
+fs::path Repository::objectsFolderPath;
+fs::path Repository::refsFolderPath;
+fs::path Repository::refsHeadFolderPath;
+fs::path Repository::HEADFilePath;
+fs::path Repository::indexFilePath;
+
+
 void Repository::InitializeClass()
 {
     project_absolute = absolute(".");

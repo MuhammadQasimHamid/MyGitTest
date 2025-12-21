@@ -1,6 +1,6 @@
-#include "commit.h"
+#include "commands/commit.h"
 #include <iostream>
-#include "gitObject.h"
+#include "core/gitObject.h"
 using namespace std;
 
 void commitCommandExe(int argc, char *argv[])

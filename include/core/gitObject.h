@@ -5,8 +5,8 @@
 #include <vector>
 #include <string>
 #include <iomanip>
-#include "include/utils/sha_1.h"
-#include "parser.h"
+#include "utils/mysha1.h"
+#include "utils/myparser.h"
 using namespace std;
 
 enum GitObjectType

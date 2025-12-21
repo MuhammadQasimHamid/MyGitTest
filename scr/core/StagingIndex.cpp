@@ -1,13 +1,16 @@
-#include "StagingIndex.h"
+#include "core/StagingIndex.h"
 #include <iostream>
 #include <vector>
 #include <filesystem>
-#include "fileCRUD.h"
-#include "myparser.h"
-#include "repository.h"
+#include "utils/fileCRUD.h"
+#include "utils/myparser.h"
+#include "core/repository.h"
 using namespace std::filesystem;
 
 #pragma region StagingIndex Implementationi
+
+vector<indexEntry> StagingIndex::indexEntries;
+path StagingIndex::indexFilePath;
 
 void StagingIndex::InitializeClass(const path &indexFilePath)
 {
@@ -105,6 +108,5 @@ bool StagingIndex::addFileToIndex(const path &filePath)
     save();
     return true;
 }
-
 
 #pragma endregion

@@ -1,4 +1,4 @@
-#include "help.h"
+#include "commands/help.h"
 #include<iostream>
 using namespace std;
 

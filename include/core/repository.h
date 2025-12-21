@@ -4,9 +4,9 @@
 #include <iostream>
 #include <fstream>
 #include <filesystem>
-#include "gitObject.h"
-#include "fileCRUD.h"
-#include "StagingIndex.h"
+#include "core/gitObject.h"
+#include "core/StagingIndex.h"
+#include "utils/fileCRUD.h"
 using namespace std::filesystem;
 using namespace std;
 namespace fs = filesystem;

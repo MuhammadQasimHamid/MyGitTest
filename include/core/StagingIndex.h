@@ -4,9 +4,9 @@
 #include <iostream>
 #include <vector>
 #include <filesystem>
-#include "fileCRUD.h"
-#include "parser.h"
-#include "repository.h"
+#include "utils/fileCRUD.h"
+#include "utils/myparser.h"
+#include "core/repository.h"
 using namespace std::filesystem;
 struct indexEntry
 {

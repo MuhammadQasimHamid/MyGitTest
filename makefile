@@ -2,26 +2,52 @@
 CXX = g++
 CXXFLAGS = -std=c++17 -Wall -Iinclude
 
-# Source files (all .cpp in src/ recursively + main file)
-SRC = mygit.cpp $(wildcard src/**/*.cpp)
+# Directories
+SRC_DIR = scr
+OBJ_DIR = build/obj
+BIN_DIR = build/bin
+
+# Subfolders in scr
+COMMANDS = $(SRC_DIR)/commands
+CORE = $(SRC_DIR)/core
+UTILS = $(SRC_DIR)/utils
+
+# Source files
+SRC_COMMANDS = $(wildcard $(COMMANDS)/*.cpp)
+SRC_CORE = $(wildcard $(CORE)/*.cpp)
+SRC_UTILS = $(wildcard $(UTILS)/*.cpp)
+SRC_MAIN = mygit.cpp
 
 # Object files
-OBJ = $(SRC:.cpp=.o)
+OBJ_COMMANDS = $(patsubst $(SRC_DIR)/%, $(OBJ_DIR)/%, $(SRC_COMMANDS:.cpp=.o))
+OBJ_CORE = $(patsubst $(SRC_DIR)/%, $(OBJ_DIR)/%, $(SRC_CORE:.cpp=.o))
+OBJ_UTILS = $(patsubst $(SRC_DIR)/%, $(OBJ_DIR)/%, $(SRC_UTILS:.cpp=.o))
+OBJ_MAIN = $(OBJ_DIR)/mygit.o
+
+# All objects
+OBJS = $(OBJ_COMMANDS) $(OBJ_CORE) $(OBJ_UTILS) $(OBJ_MAIN)
 
 # Output executable
-TARGET = mygit
+TARGET = $(BIN_DIR)/mygit
 
-# Default rule
+# Default target
 all: $(TARGET)
 
-# Link object files
-$(TARGET): $(OBJ)
-	$(CXX) $(CXXFLAGS) -o $@ $^
+# Link all objects
+$(TARGET): $(OBJS)
+	@mkdir -p $(BIN_DIR)
+	$(CXX) $(CXXFLAGS) -o $@ $^ -lz -lcrypto
 
-# Compile each .cpp to .o
-%.o: %.cpp
+# Compile main source (mygit.cpp)
+$(OBJ_DIR)/mygit.o: mygit.cpp
+	@mkdir -p $(OBJ_DIR)
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+# Compile other sources
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
+	@mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 # Clean build files
 clean:
-	rm -f $(OBJ) $(TARGET)
+	rm -rf $(OBJ_DIR)/*.o $(BIN_DIR)/mygit

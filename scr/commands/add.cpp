@@ -1,7 +1,7 @@
-#include "add.h"
+#include "commands/add.h"
 #include<iostream>
-#include "repository.h"
-#include "StagingIndex.h"
+#include "core/repository.h"
+#include "core/StagingIndex.h"
 using namespace std;
 
 void addCommandExe(int argc, char* argv[])

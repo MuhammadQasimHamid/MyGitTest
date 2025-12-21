@@ -1,6 +1,6 @@
-#include "status.h"
+#include "commands/status.h"
 #include <iostream>
-#include "repository.h"
+#include "core/repository.h"
 using namespace std;
 
 void statusCommandExe(int argc, char *argv[])

@@ -1,4 +1,4 @@
-#include "compress.h"
+#include "utils/compress.h"
 #include <iostream>
 #include <vector>
 #include <string>

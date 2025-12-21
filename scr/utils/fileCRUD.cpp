@@ -1,4 +1,4 @@
-#include "fileCRUD.h"
+#include "utils/fileCRUD.h"
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -7,7 +7,7 @@
 #include <filesystem>
 using namespace std;
 
-void writeFile(const filesystem::path &filePath, const string &content = "")
+void writeFile(const filesystem::path &filePath, const string &content)
 {
     ofstream file(filePath);
     if (!file.is_open())

@@ -1,11 +1,11 @@
-#include "gitObject.h"
+#include "core/gitObject.h"
 #include <iostream>
 #include <fstream>
 #include <vector>
 #include <string>
 #include <iomanip>
-#include "sha_1.h"
-#include "myparser.h"
+#include "utils/mysha1.h"
+#include "utils/myparser.h"
 using namespace std;
 
 // Global Funcion Implementation
