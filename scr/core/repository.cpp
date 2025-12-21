@@ -5,6 +5,8 @@
 #include "gitObject.h"
 #include "fileCRUD.h"
 #include "StagingIndex.h"
+#include "myparser.h"
+
 using namespace std::filesystem;
 using namespace std;
 namespace fs = filesystem;

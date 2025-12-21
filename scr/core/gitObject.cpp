@@ -5,7 +5,7 @@
 #include <string>
 #include <iomanip>
 #include "sha_1.h"
-#include "parser.h"
+#include "myparser.h"
 using namespace std;
 
 // Global Funcion Implementation
