@@ -31,7 +31,6 @@ void loadConfiguraion()
     cmdCodes["commit"] = commitCommandExe;
     cmdCodes["status"] = statusCommandExe;
     cmdCodes["checkout"] = checkoutCommandExe;
-    Repository::InitializeClass();
 }
 int main(int argc, char *argv[])
 {
@@ -54,6 +53,7 @@ void callFunc(int argc, char *argv[])
     }
     if(pitRepoExists() || cmdStr == "init")
     {
+        Repository::InitializeClass();
         cmdCodes[cmdStr](argc, argv);
     }
     else

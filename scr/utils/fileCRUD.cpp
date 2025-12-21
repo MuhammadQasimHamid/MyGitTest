@@ -23,7 +23,6 @@ string readFile(const filesystem::path &filePath)
 {
     string contents = "";
     string line;
-    cout << "read file" << endl;
     ifstream file(filePath);
     if (file.is_open())
     {
