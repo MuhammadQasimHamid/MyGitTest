@@ -1,0 +1,21 @@
+0 1200Index Syntax
+mode hash  offset   name
+
+
+Example:
+100644 adb36c821965862397d65fa68e26cd2433c97140 0       .gitignore
+100644 e69de29bb2d1d6434b8b29ae775ad8c2e48c5391 0       .vscode/c_cpp_properties.json
+100644 e69de29bb2d1d6434b8b29ae775ad8c2e48c5391 0       .vscode/launch.json
+100644 e69de29bb2d1d6434b8b29ae775ad8c2e48c5391 0       .vscode/tasks.json
+100644 a40b40a40a32877d6b9ec50cb0c4d781be821b50 0       DataStructures/array.cpp
+100644 68671d9c82c68c31f6f7d94a64d5e4080f1b5948 0       FileFormats/commit.txt
+100644 14c3c771e68cdef93ae2269f2258e7173d7c0f88 0       FileFormats/index.txt
+100644 07436523fa2b725e7063607281f7ff5560d95cf4 0       FileFormats/tree.txt
+100644 f78a88424c2f6d9de52f63dacefe88151466cba9 0       add.cpp
+100644 0608762e919d7c1c11524f3c8175102adb99d547 0       commit.cpp
+100644 e413dd39432f4a65705c6b5b433a6713ea3c0463 0       compress.cpp
+100644 0102c5e7c514623bc5906cd4ade357fc5b61f799 0       fileCRUD.cpp
+100644 082c9e160dc219764d37d370c671024b46da6eff 0       gitObject.cpp
+100644 9fa88b757502fc62e5df548f2ebfa1eed067653b 0       help.cpp
+100644 a09431c6adbac984cb65a79c4b7d4f7e14845846 0       hi.py
+100644 62e6ef4bfe94a594fa758d368d4b7b68e074c98c 0       hisgit.py

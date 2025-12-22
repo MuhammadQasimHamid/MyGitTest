@@ -12,7 +12,6 @@ using namespace std::filesystem;
 using namespace std;
 namespace fs = filesystem;
 
-
 #pragma region Repository
 fs::path Repository::project_absolute;
 fs::path Repository::pitFolderPath;
@@ -22,7 +21,6 @@ fs::path Repository::refsHeadFolderPath;
 fs::path Repository::HEADFilePath;
 fs::path Repository::indexFilePath;
 
-
 void Repository::InitializeClass()
 {
     project_absolute = absolute(".");
@@ -31,7 +29,7 @@ void Repository::InitializeClass()
     refsFolderPath = pitFolderPath / "refs";
     refsHeadFolderPath = refsFolderPath / "heads";
     HEADFilePath = pitFolderPath / "HEAD";
-    indexFilePath = pitFolderPath / "StagingIndex::";
+    indexFilePath = pitFolderPath / "index";
     StagingIndex::InitializeClass(Repository::indexFilePath);
 }
 bool Repository::initRepo() // returns true if repo initialized successfully
@@ -80,7 +78,6 @@ bool Repository::initRepo() // returns true if repo initialized successfully
     }
     return false;
 }
-
 void Repository::storeObject(GitObject gitObj)
 {
     string objHash = gitObj.getHash(); //
@@ -94,7 +91,7 @@ void Repository::storeObject(GitObject gitObj)
         {
 
             create_directory(objectDirPath);
-            writeFile(objectFilePath, gitObj.contents);
+            writeFile(objectFilePath, gitObj.serialize());
         }
     }
     catch (const exception &e)

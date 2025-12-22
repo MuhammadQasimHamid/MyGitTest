@@ -43,6 +43,9 @@ public:
 
     static void save();
 
+    static bool addPathToIndex(const path &dirPath);
+    static bool addDirectory(const path &dirPath);
+
     static bool isTrackedFile(const path &filePath);
 
     static indexEntry *getEntry(const path &filePath);

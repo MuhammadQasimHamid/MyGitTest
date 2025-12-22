@@ -26,16 +26,12 @@ public:
     {
     }
     static void InitializeClass();
-    
+
     static bool initRepo(); // returns true if repo initialized successfully
-   
 
     static void storeObject(GitObject gitObj);
-    
 
     static string currentBranch();
-    
-
 };
 
 #endif

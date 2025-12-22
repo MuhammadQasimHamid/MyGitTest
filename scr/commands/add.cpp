@@ -1,19 +1,19 @@
 #include "commands/add.h"
-#include<iostream>
+#include <iostream>
 #include "core/repository.h"
 #include "core/StagingIndex.h"
 using namespace std;
 
-void addCommandExe(int argc, char* argv[])
+void addCommandExe(int argc, char *argv[])
 {
-    if(argc == 3)
+    if (argc == 3)
     {
-        if(!StagingIndex::addFileToIndex(argv[2]))
+        if (!StagingIndex::addPathToIndex(argv[2]))
         {
-            cout << "Alreaduy" <<endl;
+            cout << "Folder Or file doen't exist!" << endl;
         }
     }
-    else 
+    else
     {
         cout << "Invalid Params" << endl;
     }
