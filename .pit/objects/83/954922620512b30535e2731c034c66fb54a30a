@@ -1,0 +1,7 @@
+0 101#ifndef ADD_H
+#define ADD_H
+#include <iostream>
+
+void addCommandExe(int argc, char *argv[]);
+
+#endif
