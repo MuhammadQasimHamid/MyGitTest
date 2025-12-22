@@ -10,7 +10,7 @@ void addCommandExe(int argc, char* argv[])
     {
         if(!StagingIndex::addFileToIndex(argv[2]))
         {
-            cout << "Alreaduy" <<endl;
+            cout << "Already" <<endl;
         }
     }
     else 

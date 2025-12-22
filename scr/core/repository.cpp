@@ -31,7 +31,7 @@ void Repository::InitializeClass()
     refsFolderPath = pitFolderPath / "refs";
     refsHeadFolderPath = refsFolderPath / "heads";
     HEADFilePath = pitFolderPath / "HEAD";
-    indexFilePath = pitFolderPath / "StagingIndex::";
+    indexFilePath = pitFolderPath / "index";
     StagingIndex::InitializeClass(Repository::indexFilePath);
 }
 bool Repository::initRepo() // returns true if repo initialized successfully

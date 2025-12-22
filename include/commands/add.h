@@ -4,5 +4,6 @@
 // using namespace std; don't write in .h files
 
 void addCommandExe(int argc, char* argv[]);
+// sldkfjklsdj
 
 #endif
