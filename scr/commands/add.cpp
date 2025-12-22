@@ -6,11 +6,14 @@ using namespace std;
 
 void addCommandExe(int argc, char *argv[])
 {
-    if (argc == 3)
+    if (argc >= 3)
     {
-        if (!StagingIndex::addPathToIndex(argv[2]))
+        for (int i = 2; i < argc; i++)
         {
-            cout << "Folder Or file doen't exist!" << endl;
+            if (!StagingIndex::addPathToIndex(argv[i]))
+            {
+                cout << argv[i] << " Folder Or file doen't exist!" << endl;
+            }
         }
     }
     else

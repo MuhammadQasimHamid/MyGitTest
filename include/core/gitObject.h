@@ -18,7 +18,7 @@ enum GitObjectType
     Nothing
 };
 GitObjectType stoGitObjectType(string str);
-
+string GitObjectTypetos(GitObjectType gObj);
 struct treeEntry
 {
     string mode;
@@ -77,19 +77,17 @@ public:
     CommitObject(string serializedObject); // desterilize contents
 
     string serializeContent();
-    
 };
 
-class TreeObject :  public GitObject
+class TreeObject : public GitObject
 {
     vector<treeEntry> entires;
     TreeObject();
-    TreeObject(string serilizedObject);  // desterilieze (contents to TreeObject)
-    
+    TreeObject(string serilizedObject); // desterilieze (contents to TreeObject)
+
     string serializeContent();
-    
+
     void addEntry(treeEntry entry);
-    
 };
 
 #endif

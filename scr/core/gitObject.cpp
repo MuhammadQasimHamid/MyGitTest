@@ -21,6 +21,18 @@ GitObjectType stoGitObjectType(string str)
         return Tag;
     return Nothing;
 }
+string GitObjectTypetos(GitObjectType gObj)
+{
+    if (gObj == Tree)
+        return "tree";
+    if (gObj == Commit)
+        return "commit";
+    if (gObj == Blob)
+        return "blob";
+    if (gObj == Tag)
+        return "tag";
+    return "";
+}
 
 #pragma region GitObject
 // GitObject Constructors Implementation
@@ -51,13 +63,12 @@ string GitObject::getHash()
 
 string GitObject::serialize()
 {
-    string header = to_string(objectType) + " " + to_string(contents.size()) + "\0";
+    string header = GitObjectTypetos(objectType) + " " + to_string(contents.size()) + '\0';
     string headerContent = header + contents;
     return headerContent;
 }
 
 #pragma endregion
-
 
 #pragma region BlobObject
 // BlobObjects Constructors Implementation
@@ -99,7 +110,6 @@ CommitObject::CommitObject(string serializedObject) : GitObject(serializedObject
     }
 }
 
-
 string CommitObject::serializeContent()
 {
     string res = "";
@@ -117,34 +127,34 @@ string CommitObject::serializeContent()
 #pragma region TreeObject
 // TreeObject Constructors Implementation
 
-    TreeObject::TreeObject() : GitObject(Tree, "")
+TreeObject::TreeObject() : GitObject(Tree, "")
+{
+}
+TreeObject::TreeObject(string serilizedObject) : GitObject(serilizedObject) // desterilieze (contents to TreeObject)
+{
+    vector<string> lines = split(contents, '\n');
+    for (auto l : lines)
     {
+        vector<string> parts = split(l, '\n');
+        entires.push_back(treeEntry(parts[0], stoGitObjectType(parts[1]), parts[2], parts[3]));
     }
-    TreeObject::TreeObject(string serilizedObject) : GitObject(serilizedObject) // desterilieze (contents to TreeObject)
-    {
-        vector<string> lines = split(contents, '\n');
-        for (auto l : lines)
-        {
-            vector<string> parts = split(l, '\n');
-            entires.push_back(treeEntry(parts[0], stoGitObjectType(parts[1]), parts[2], parts[3]));
-        }
-    }
+}
 
-    string TreeObject::serializeContent()
+string TreeObject::serializeContent()
+{
+    string mode, hash, name;
+    GitObjectType type;
+    string res = "";
+    for (auto e : entires)
     {
-        string mode, hash, name;
-        GitObjectType type;
-        string res = "";
-        for (auto e : entires)
-        {
-            e.fill(mode, type, hash, name); // fill variables from entry
-            res += mode + " " + to_string(type) + " " + hash + " " + name + "\n";
-        }
-        return res;
+        e.fill(mode, type, hash, name); // fill variables from entry
+        res += mode + " " + to_string(type) + " " + hash + " " + name + "\n";
     }
-    void TreeObject::addEntry(treeEntry entry)
-    {
-        entires.push_back(entry);
-    }
+    return res;
+}
+void TreeObject::addEntry(treeEntry entry)
+{
+    entires.push_back(entry);
+}
 
 #pragma endregion

@@ -18,7 +18,6 @@ void writeFile(const filesystem::path &filePath, const string &content)
     file.close();
 }
 
-
 string readFile(const filesystem::path &filePath)
 {
     string contents = "";
@@ -26,10 +25,8 @@ string readFile(const filesystem::path &filePath)
     ifstream file(filePath);
     if (file.is_open())
     {
-        cout << "is open" << endl;
         while (!file.eof())
         {
-            cout << "while" << endl;
             getline(file, line);
             contents += line + "\n";
         }

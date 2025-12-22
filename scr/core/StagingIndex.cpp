@@ -81,6 +81,25 @@ indexEntry *StagingIndex::getEntry(const path &filePath)
     }
     return nullptr;
 }
+bool StagingIndex::addPathToIndex(const path &dirPath)
+{
+    path relativePath = relative(absolute(dirPath), Repository::project_absolute);
+    if (!exists(relativePath))
+        return false;
+    if (is_directory(relativePath))
+    {
+        addDirectory(relativePath);
+    }
+    else if (is_regular_file(relativePath))
+    {
+        addFileToIndex(relativePath);
+    }
+    else
+    {
+        return false;
+    }
+    return true;
+}
 bool StagingIndex::addFileToIndex(const path &filePath)
 {
     if (!exists(filePath) || !is_regular_file(filePath))
@@ -106,28 +125,10 @@ bool StagingIndex::addFileToIndex(const path &filePath)
     indexEntry iE("100644", hash, "0", relPath.generic_string());
     addEntry(iE);
     save();
+    cout << filePath << " added" << endl;
     return true;
 }
 
-bool StagingIndex::addPathToIndex(const path &dirPath)
-{
-    path relativePath = relative(absolute(dirPath), Repository::project_absolute);
-    if (!exists(relativePath))
-        return false;
-    if (is_directory(relativePath))
-    {
-        addDirectory(relativePath);
-    }
-    else if (is_regular_file(relativePath))
-    {
-        addFileToIndex(relativePath);
-    }
-    else
-    {
-        return false;
-    }
-    return true;
-}
 bool StagingIndex::addDirectory(const path &dirPath)
 {
     if (!exists(dirPath) || !is_directory(dirPath))
