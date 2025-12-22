@@ -1,7 +1,0 @@
-0 110#ifndef STATUS_H
-#define STATUS_H
-#include <iostream>
-
-void statusCommandExe(int argc, char *argv[]);
-
-#endif
