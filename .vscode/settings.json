@@ -1,0 +1,9 @@
+{
+    "makefile.launchConfigurations": [
+        {
+            "cwd": "d:\\3rd Sems\\DSA\\DSAL\\githubRepos\\MyGitTest\\build\\bin",
+            "binaryPath": "d:\\3rd Sems\\DSA\\DSAL\\githubRepos\\MyGitTest\\build\\bin\\pit",
+            "binaryArgs": []
+        }
+    ]
+}

@@ -81,6 +81,7 @@ public:
 
 class TreeObject : public GitObject
 {
+    public:
     vector<treeEntry> entires;
     TreeObject();
     TreeObject(string serilizedObject); // desterilieze (contents to TreeObject)

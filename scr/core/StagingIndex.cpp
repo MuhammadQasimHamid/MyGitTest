@@ -62,7 +62,7 @@ bool StagingIndex::isTrackedFile(const path &filePath)
 {
     for (const auto &iE : indexEntries)
     {
-        if (iE.path == filePath.generic_string())
+        if (iE.path == filePath.string())
         {
             return true;
         }
@@ -74,7 +74,7 @@ indexEntry *StagingIndex::getEntry(const path &filePath)
 {
     for (auto &iE : indexEntries)
     {
-        if (iE.path == filePath.generic_string())
+        if (iE.path == filePath.string())
         {
             return &iE;
         }
@@ -122,7 +122,7 @@ bool StagingIndex::addFileToIndex(const path &filePath)
         save();
         return true;
     }
-    indexEntry iE("100644", hash, "0", relPath.generic_string());
+    indexEntry iE("100644", hash, "0", relPath.string());
     addEntry(iE);
     save();
     cout << filePath << " added" << endl;

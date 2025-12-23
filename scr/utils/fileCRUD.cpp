@@ -10,11 +10,10 @@ using namespace std;
 void writeFile(const filesystem::path &filePath, const string &content)
 {
     ofstream file(filePath);
-    if (!file.is_open())
+    if (file.is_open())
     {
-        throw runtime_error(string("Failed to create File: ") + filePath.string());
+        file << content;
     }
-    file << content;
     file.close();
 }
 

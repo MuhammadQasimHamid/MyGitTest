@@ -155,6 +155,7 @@ string TreeObject::serializeContent()
 void TreeObject::addEntry(treeEntry entry)
 {
     entires.push_back(entry);
+    contents = serializeContent();
 }
 
 #pragma endregion

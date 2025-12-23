@@ -21,6 +21,7 @@ public:
     static path refsHeadFolderPath;
     static path HEADFilePath;
     static path indexFilePath;
+    static path pitIgnoreFilePath;
 
     Repository()
     {
@@ -31,7 +32,15 @@ public:
 
     static void storeObject(GitObject gitObj);
 
+    static void generateCommit(string msg);
+    
+    static TreeObject StoreDirTree(fs::path dirPath);
+   
     static string currentBranch();
+    static string BranchPointToHashOrNothing(string branch);
+    static void UpdateBranchHash(string branch,string hash);
+
+    static bool isInPitIgnore(fs::path pathtoCheck);
 };
 
 #endif

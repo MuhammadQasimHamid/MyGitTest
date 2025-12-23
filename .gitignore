@@ -7,7 +7,6 @@
 # Build directories
 build/
 bin/
+.pit
 
 # Temporary files
-*.log
-*.tmp
