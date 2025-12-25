@@ -33,13 +33,14 @@ public:
     static void storeObject(GitObject gitObj);
 
     static void generateCommit(string msg);
-    
+
     static TreeObject StoreDirTree(fs::path dirPath);
-   
+    static TreeObject StoreIndexForCommit();
+
     static string currentBranch();
     static string BranchPointToHashOrNothing(string branch);
-    static void UpdateBranchHash(string branch,string hash);
-
+    static void UpdateBranchHash(string branch, string hash);
+    static TreeObject StoreTreeRec(string prefix);
     static bool isInPitIgnore(fs::path pathtoCheck);
 };
 

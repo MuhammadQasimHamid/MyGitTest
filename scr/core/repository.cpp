@@ -95,8 +95,7 @@ void Repository::storeObject(GitObject gitObj)
 
             create_directory(objectDirPath);
             writeFile(objectFilePath, gitObj.serialize());
-            cout << "Object Saved:("<< gitObj.getHash() <<")     " <<gitObj.serialize();
-
+            cout << "Object Saved:(" << gitObj.getHash() << ")     " << gitObj.serialize();
         }
     }
     catch (const exception &e)
@@ -112,7 +111,7 @@ void Repository::generateCommit(string msg)
 {
     TreeObject treeObj = StoreDirTree(project_absolute); // TreeHash
     string treeHash = treeObj.getHash();
-    vector<string> parentHashs;                       // Parent Hashes
+    vector<string> parentHashs; // Parent Hashes
     parentHashs.push_back(BranchPointToHashOrNothing(currentBranch()));
     CommitObject CObj(treeHash, parentHashs, "Qasim", msg, "12/12/12");
     storeObject(CObj);
@@ -137,7 +136,7 @@ TreeObject Repository::StoreDirTree(fs::path dirPath)
                     cout << "     is in tracking";
                     indexEntry *te = StagingIndex::getEntry(dirEntry.path());                        // get the entry having this file
                     treeEntry tEntry(te->mode, Blob, te->hash, dirEntry.path().filename().string()); // make treeEntry to push into treeObject
-                    //storeObject() is not needed here bcz this is a tracking file and tracked/staged files are already stored in object folder
+                    // storeObject() is not needed here bcz this is a tracking file and tracked/staged files are already stored in object folder
                     treeObject.addEntry(tEntry);
                 }
             }
@@ -147,9 +146,9 @@ TreeObject Repository::StoreDirTree(fs::path dirPath)
                 TreeObject subtreeObj = StoreDirTree(dirEntry.path());
                 string subtreeHash = subtreeObj.getHash();
                 cout << "subtree Contains " << subtreeObj.entires.size() << endl;
-                if(subtreeObj.entires.size() > 0) // if there exists entires in tree
+                if (subtreeObj.entires.size() > 0) // if there exists entires in tree
                 {
-                    storeObject(subtreeObj); // store this tree object 
+                    storeObject(subtreeObj); // store this tree object
                     // add this subtreehash into mainTreeEntries
                     treeEntry tEntry("10006", Tree, subtreeHash, dirEntry.path().filename().string()); // make treeEntry to push into treeObject
                     treeObject.addEntry(tEntry);
@@ -161,12 +160,35 @@ TreeObject Repository::StoreDirTree(fs::path dirPath)
                 }
             }
         }
-        else 
+        else
         {
             cout << "    ignore it";
         }
         cout << endl;
     }
+    return treeObject;
+}
+
+TreeObject Repository::StoreIndexForCommit()
+{
+    // first i will take all entries from staging Index then i will sperate root files and folder from each other
+    // then
+
+    TreeObject treeObject;
+    return treeObject;
+}
+
+TreeObject Repository::StoreTreeRec(string prefix) // dir is relative path
+{
+    TreeObject treeObject;
+    int size = prefix.length();
+    for (const auto iE : StagingIndex::indexEntries)
+    {
+        if (iE.path.substr(0, size - 1) == prefix)
+        {
+        }
+    }
+
     return treeObject;
 }
 
@@ -205,10 +227,10 @@ void Repository::UpdateBranchHash(string branch, string hash)
 bool Repository::isInPitIgnore(fs::path pathtoCheck)
 {
     string fileContents = readFile(pitIgnoreFilePath);
-    vector<string> lines = split(fileContents,'\n');
-    for(string l:lines)
+    vector<string> lines = split(fileContents, '\n');
+    for (string l : lines)
     {
-        if(l == pathtoCheck.filename().string())
+        if (l == pathtoCheck.filename().string())
             return true;
     }
     return false;
