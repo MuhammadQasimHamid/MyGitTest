@@ -14,7 +14,7 @@ void commitCommandExe(int argc, char *argv[])
         {
             cout << "Commited " << endl;
             string msg = argv[4 - 1];
-            Repository::StoreIndexForCommit();
+            Repository::generateCommit(msg);
         }
     }
 }

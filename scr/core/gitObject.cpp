@@ -148,7 +148,7 @@ string TreeObject::serializeContent()
     for (auto e : entires)
     {
         e.fill(mode, type, hash, name); // fill variables from entry
-        res += mode + " " + to_string(type) + " " + hash + " " + name + "\n";
+        res += mode + " " + GitObjectTypetos(type) + " " + hash + " " + name + "\n";
     }
     return res;
 }

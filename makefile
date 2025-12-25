@@ -9,23 +9,26 @@ BIN_DIR = build/bin
 
 # Subfolders in scr
 COMMANDS = $(SRC_DIR)/commands
+DATASTRUCTURE = $(SRC_DIR)/dataStructure
 CORE = $(SRC_DIR)/core
 UTILS = $(SRC_DIR)/utils
 
 # Source files
 SRC_COMMANDS = $(wildcard $(COMMANDS)/*.cpp)
+SRC_DATASTRUCTURE = $(wildcard $(DATASTRUCTURE)/*.cpp)
 SRC_CORE = $(wildcard $(CORE)/*.cpp)
 SRC_UTILS = $(wildcard $(UTILS)/*.cpp)
 SRC_MAIN = pit.cpp
 
 # Object files
 OBJ_COMMANDS = $(patsubst $(SRC_DIR)/%, $(OBJ_DIR)/%, $(SRC_COMMANDS:.cpp=.o))
+OBJ_DATASTRUCTURE = $(patsubst $(SRC_DIR)/%, $(OBJ_DIR)/%, $(SRC_DATASTRUCTURE:.cpp=.o))
 OBJ_CORE = $(patsubst $(SRC_DIR)/%, $(OBJ_DIR)/%, $(SRC_CORE:.cpp=.o))
 OBJ_UTILS = $(patsubst $(SRC_DIR)/%, $(OBJ_DIR)/%, $(SRC_UTILS:.cpp=.o))
 OBJ_MAIN = $(OBJ_DIR)/pit.o
 
 # All objects
-OBJS = $(OBJ_COMMANDS) $(OBJ_CORE) $(OBJ_UTILS) $(OBJ_MAIN)
+OBJS = $(OBJ_COMMANDS) $(OBJ_CORE) $(OBJ_UTILS) $(OBJ_MAIN) $(OBJ_DATASTRUCTURE)
 
 # Output executable
 TARGET = $(BIN_DIR)/pit
