@@ -113,17 +113,26 @@ string Repository::storeObject(GitObject gitObj)
 void Repository::generateCommit(string msg)
 {
     string treeHash = StoreIndexForCommit(); // TreeHash
-    vector<string> parentHashs;              // Parent Hashes
+    if (treeHash == "")
+    {
+        cout << "Nothing to commit, working tree clean" << endl;
+        return;
+    }
+    vector<string> parentHashs; // Parent Hashes
     parentHashs.push_back(BranchPointToHashOrNothing(currentBranch()));
     CommitObject CObj(treeHash, parentHashs, "Umar", msg, "12/12/12");
     storeObject(CObj);
+    StagingIndex::indexEntries.clear();
+    StagingIndex::save();
     UpdateBranchHash(currentBranch(), CObj.getHash());
 }
 
 string Repository::StoreIndexForCommit()
 {
-    // first i will take all entries from staging Index then i will sperate root files and folder from each other
-    // then
+    if (StagingIndex::indexEntries.size() == 0)
+    {
+        return "";
+    }
     NTree tree = NTree();
     for (const auto &iE : StagingIndex::indexEntries)
     {
