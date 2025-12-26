@@ -1,10 +1,12 @@
-#include "core/repository.h"
 #include <iostream>
 #include <fstream>
 #include <filesystem>
+#include <algorithm>
+#include "core/repository.h"
 #include "core/gitObject.h"
 #include "core/StagingIndex.h"
 #include "utils/fileCRUD.h"
+#include "dataStructure/Ntree.h"
 #include "utils/myparser.h"
 #include "utils/mysha1.h"
 
@@ -81,7 +83,7 @@ bool Repository::initRepo() // returns true if repo initialized successfully
     }
     return false;
 }
-void Repository::storeObject(GitObject gitObj)
+string Repository::storeObject(GitObject gitObj)
 {
     string objHash = gitObj.getHash(); //
     path objectDirPath = objectsFolderPath / objHash.substr(0, 2);
@@ -95,8 +97,7 @@ void Repository::storeObject(GitObject gitObj)
 
             create_directory(objectDirPath);
             writeFile(objectFilePath, gitObj.serialize());
-            cout << "Object Saved:("<< gitObj.getHash() <<")     " <<gitObj.serialize();
-
+            cout << "Object Saved:(" << gitObj.getHash() << ")     " << gitObj.serialize();
         }
     }
     catch (const exception &e)
@@ -107,67 +108,68 @@ void Repository::storeObject(GitObject gitObj)
     {
         cout << "There is an error in storing object(s)." << endl;
     }
+    return objHash;
 }
 void Repository::generateCommit(string msg)
 {
-    TreeObject treeObj = StoreDirTree(project_absolute); // TreeHash
-    string treeHash = treeObj.getHash();
-    vector<string> parentHashs;                       // Parent Hashes
+    string treeHash = StoreIndexForCommit(); // TreeHash
+    vector<string> parentHashs;              // Parent Hashes
     parentHashs.push_back(BranchPointToHashOrNothing(currentBranch()));
-    CommitObject CObj(treeHash, parentHashs, "Qasim", msg, "12/12/12");
+    CommitObject CObj(treeHash, parentHashs, "Umar", msg, "12/12/12");
     storeObject(CObj);
     UpdateBranchHash(currentBranch(), CObj.getHash());
 }
 
-TreeObject Repository::StoreDirTree(fs::path dirPath)
+string Repository::StoreIndexForCommit()
 {
-    TreeObject treeObject; // no need to write treeObject() instead of treeObject
-    for (auto &dirEntry : fs::directory_iterator(dirPath))
+    // first i will take all entries from staging Index then i will sperate root files and folder from each other
+    // then
+    NTree tree = NTree();
+    for (const auto &iE : StagingIndex::indexEntries)
     {
-        cout << "Path :" << dirEntry.path().relative_path();
-
-        // string name = dirEntry.path().filename().string();
-        if (!isInPitIgnore(dirEntry.path()))
-        {
-            if (fs::is_regular_file(dirEntry.path()))
-            {
-                cout << "      is a file and ";
-                if (StagingIndex::isTrackedFile(dirEntry.path().relative_path())) // if this file is a tracked file/ means available in staggingArea/index
-                {
-                    cout << "     is in tracking";
-                    indexEntry *te = StagingIndex::getEntry(dirEntry.path());                        // get the entry having this file
-                    treeEntry tEntry(te->mode, Blob, te->hash, dirEntry.path().filename().string()); // make treeEntry to push into treeObject
-                    //storeObject() is not needed here bcz this is a tracking file and tracked/staged files are already stored in object folder
-                    treeObject.addEntry(tEntry);
-                }
-            }
-            else if (fs::is_directory(dirEntry.path()))
-            {
-                cout << "      is a directory";
-                TreeObject subtreeObj = StoreDirTree(dirEntry.path());
-                string subtreeHash = subtreeObj.getHash();
-                cout << "subtree Contains " << subtreeObj.entires.size() << endl;
-                if(subtreeObj.entires.size() > 0) // if there exists entires in tree
-                {
-                    storeObject(subtreeObj); // store this tree object 
-                    // add this subtreehash into mainTreeEntries
-                    treeEntry tEntry("10006", Tree, subtreeHash, dirEntry.path().filename().string()); // make treeEntry to push into treeObject
-                    treeObject.addEntry(tEntry);
-                    cout << "   subtree saved";
-                }
-                else
-                {
-                    cout << "   subtree ignored as it has no entry";
-                }
-            }
-        }
-        else 
-        {
-            cout << "    ignore it";
-        }
-        cout << endl;
+        tree.root = tree.add(iE);
     }
-    return treeObject;
+    string hash = StoreTreeRec(tree.root);
+    return hash;
+}
+
+string Repository::StoreTreeRec(TreeNode *node)
+{
+    cout << "Visiting Node: " << node->name << endl;
+    // FILE → blob already exists
+    if (node->isFile)
+    {
+        return node->hash;
+    }
+    TreeObject treeObj;
+
+    for (auto *child : node->children)
+    {
+        string childHash = StoreTreeRec(child);
+
+        treeEntry entry = treeEntry(child->mode, child->isFile ? Blob : Tree, childHash, child->name);
+        entry.name = child->name;
+        entry.hash = childHash;
+
+        if (child->isFile)
+            entry.mode = "100644";
+        else
+            entry.mode = "40000";
+
+        treeObj.addEntry(entry);
+    }
+
+    // Git requires sorting by name
+    sort(treeObj.entires.begin(), treeObj.entires.end(),
+         [](const treeEntry &a, const treeEntry &b)
+         {
+             return a.name < b.name;
+         });
+
+    treeObj.serializeContent();
+    string treeHash = storeObject(treeObj);
+    node->hash = treeHash;
+    return treeHash;
 }
 
 string Repository::currentBranch()
@@ -205,10 +207,10 @@ void Repository::UpdateBranchHash(string branch, string hash)
 bool Repository::isInPitIgnore(fs::path pathtoCheck)
 {
     string fileContents = readFile(pitIgnoreFilePath);
-    vector<string> lines = split(fileContents,'\n');
-    for(string l:lines)
+    vector<string> lines = split(fileContents, '\n');
+    for (string l : lines)
     {
-        if(l == pathtoCheck.filename().string())
+        if (l == pathtoCheck.filename().string())
             return true;
     }
     return false;
