@@ -10,6 +10,29 @@
 #include "utils/myparser.h"
 #include "utils/mysha1.h"
 
+
+
+FileStatus sToFileStatus(string str)
+{
+    if(str == "same")
+        return File_Same;
+    if(str == "not exist")
+        return File_NotExist;
+    if(str == "contents differ")
+        return File_ContentsDiffer;
+    return File_Nothing;
+}
+string fileStatusToS(FileStatus fileStatus)
+{
+    if(fileStatus == File_Same)
+        return "same";
+    if(fileStatus ==  File_NotExist)
+        return "not exist";
+    if(fileStatus ==  File_ContentsDiffer)
+        return "contents differ";
+    return "nothing";
+}
+
 using namespace std::filesystem;
 using namespace std;
 namespace fs = filesystem;
@@ -204,13 +227,15 @@ string Repository::currentBranch()
 }
 string Repository::BranchPointToHashOrNothing(string branch)
 {
-    string branchHashOrNothing = readFile(refsHeadFolderPath / branch);
+    string branchHashOrNothing = readFile(".pit/refs/heads/master");
     cout << "main:" << branchHashOrNothing << endl;
     return branchHashOrNothing;
 }
 void Repository::UpdateBranchHash(string branch, string hash)
 {
-    writeFile(refsHeadFolderPath / branch, hash);
+    path branchFile = refsHeadFolderPath / branch;
+    cout << "Branch Update: " << (branchFile.string()) << " hash: " << hash;
+    writeFile(".pit/refs/heads/master", hash); // change it letter (we will not hardcode)
 }
 
 bool Repository::isInPitIgnore(fs::path pathtoCheck)
@@ -223,4 +248,25 @@ bool Repository::isInPitIgnore(fs::path pathtoCheck)
             return true;
     }
     return false;
+}
+
+// Comparisons
+FileStatus Repository::IndexWorkingDirComp(indexEntry iE, fs::path filePath)
+{
+    
+    // .pit/objects/2c/aaef87a6ef8ae6fa87ef6a8e76fa87ef
+    fs::path indexFilePath = objectsFolderPath / iE.hash.substr(0, 2) / iE.hash.substr(2);
+    if (exists(filePath))
+    {
+        if (file_size(filePath) != file_size(indexFilePath) || last_write_time(filePath) != last_write_time(indexFilePath))
+        {
+            string fileContents = readFile(filePath);
+            BlobObject BObj(filePath.filename().string(),fileContents);
+            if(BObj.getHash() != iE.hash)
+                return File_ContentsDiffer;
+        }
+        return File_Same;
+    }
+    else
+        return File_NotExist;
 }
