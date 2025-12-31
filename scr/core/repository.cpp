@@ -248,11 +248,13 @@ bool Repository::isInPitIgnore(fs::path pathtoCheck)
     vector<string> lines = split(fileContents, '\n');
     for (string l : lines)
     {
-        if (l == pathtoCheck.filename().string())
+            if( l ==  relative(absolute(pathtoCheck), Repository::project_absolute).string())// compare paths correctly || is_a_subfolder(path(l),pathtoCheck))
             return true;
     }
     return false;
 }
+
+
 
 // Comparisons
 FileStatus Repository::IndexWorkingDirComp(indexEntry iE, fs::path filePath)
@@ -266,7 +268,8 @@ FileStatus Repository::IndexWorkingDirComp(indexEntry iE, fs::path filePath)
         {
             string fileContents = readFile(filePath);
             BlobObject BObj(filePath.filename().string(), fileContents);
-            if (BObj.getHash() != iE.hash)
+            string fileHash = BObj.getHash();
+            if (fileHash != iE.hash)
                 return File_ContentsDiffer;
         }
         return File_Same;

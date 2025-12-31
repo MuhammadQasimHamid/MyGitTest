@@ -14,5 +14,5 @@ std::string readFile(const std::filesystem::path &filePath);
 std::string readFileWithStoredObjectHash(const std::string &hash);
 void writeFileWithBytes(const std::string &path, const std::vector<unsigned char> &data);
 
-
+bool is_a_subfolder( std::filesystem::path base,std::filesystem::path child);
 #endif

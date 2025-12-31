@@ -17,7 +17,7 @@ void writeFile(const filesystem::path &filePath, const string &content)
     }
     else
     {
-        if (!(fs::exists(filePath)))
+        if (!(exists(filePath)))
         {
             cout << "Error: File not found!" << endl;
         }
@@ -53,7 +53,7 @@ string readFile(const filesystem::path &filePath)
 }
 string readFileWithStoredObjectHash(const string &hash)
 {
-    fs::path filePath = Repository::objectsFolderPath / hash.substr(0, 2) / hash.substr(2);
+    path filePath = Repository::objectsFolderPath / hash.substr(0, 2) / hash.substr(2);
     string contents = "";
     string line;
     ifstream file(filePath);
@@ -84,4 +84,26 @@ void writeFileWithBytes(const string &path, const vector<unsigned char> &data)
 
     file.write(reinterpret_cast<const char *>(data.data()), data.size());
     file.close();
+}
+
+bool is_a_subfolder( path base,path child)
+{
+    // Normalize both paths lexically
+    path normal_base = base.lexically_normal();
+    path normal_child = child.lexically_normal();
+
+    // If the base path is a file, it cannot be a subfolder of anything
+    if (exists(normal_base) && !is_directory(normal_base))
+    {
+        return false;
+    }
+
+    // Use std::mismatch to compare the path elements
+    auto mismatch_pair = std::mismatch(normal_base.begin(), normal_base.end(),
+                                       normal_child.begin(), normal_child.end());
+
+    // If the base path elements all matched the beginning of the child path elements,
+    // then the child is a subfolder (or is the same path)
+    bool res = mismatch_pair.first == normal_base.end();
+    return res;
 }

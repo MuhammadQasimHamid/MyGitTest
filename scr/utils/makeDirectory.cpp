@@ -24,3 +24,4 @@ void makeDirectory(const char *dirName)
     }
     return;
 }
+

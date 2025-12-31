@@ -11,9 +11,10 @@ void setColor(int fore, int back)
 }
 void statusCommandExe(int argc, char *argv[])
 {
-    cout << "On Branch " << Repository::currentBranch();
+    bool stagedChangesExist = false, unstagedChangesExist = false;
+    cout << "On Branch " << Repository::currentBranch() << endl;
 
-    cout << "Changes staged for commit:" << endl;
+    cout << "Changes to be committed:" << endl;
     string cBranch = Repository::currentBranch();
     string cBranchHash = Repository::getBranchHash(cBranch);
     string rawFileContentsCommit = readFileWithStoredObjectHash(cBranchHash);
@@ -24,14 +25,17 @@ void statusCommandExe(int argc, char *argv[])
     // cout << "Comparing with Last Commit: " << StagingIndex::indexEntries.size() <<"" << endl;
     for (auto iE : StagingIndex::indexEntries)
     {
-        cout << "           ";
+        cout << "                 ";
         if (flattenTree.find(iE.path) != flattenTree.end())
         {
             FileStatus fStatus = Repository::IndexLastCommitComp(iE, (flattenTree[iE.path]).hash);
-            setColor(0,5);
-            if(fStatus == File_ContentsDiffer)
+            setColor(0, 5);
+            if (fStatus == File_ContentsDiffer)
+            {
+                stagedChangesExist = true;
                 cout << "modified" << " " << iE.path << endl;
-            setColor(0,7);
+            }
+            setColor(0, 7);
         }
         else
         {
@@ -40,25 +44,32 @@ void statusCommandExe(int argc, char *argv[])
     }
     cout << "End" << endl;
 
-    cout << "Changes to be committed:" << endl;
+    cout << "Changes not staged for commit:" << endl;
     for (auto iE : StagingIndex::indexEntries)
     {
-        cout << "                     ";
+        cout << "                 ";
         FileStatus fStatus = Repository::IndexWorkingDirComp(iE, iE.path);
-        if (fStatus == File_Same)
+        // cout << fileStatusToS(fStatus) << " " << iE.path << endl;
+        if (fStatus == File_ContentsDiffer)
         {
-            cout << " " << iE.path << endl;
+            unstagedChangesExist = true;
+            setColor(0, 5);
+            cout << "modified" << " " << iE.path << endl;
+            setColor(0, 7);
         }
     }
     cout << "End" << endl;
+    if (!stagedChangesExist && !unstagedChangesExist)
+    {
+        cout << "Working Area Clean, nothing to commit" << endl;
+    }
 
-    
-    // cout << "Untracked Files" << endl;
-    // for(auto it:recursive_directory_iterator(Repository::project_absolute))
-    // {
-    //     if(!StagingIndex::isTrackedFile(it.path()) && is_regular_file(it.path()))
-    //     {
-    //         cout << "Untracked: " << it.path().string() << endl;
-    //     }
-    // }
+    cout << "Untracked Files" << endl;
+    for (auto it : recursive_directory_iterator(Repository::project_absolute))
+    {
+        if (!StagingIndex::isTrackedFile(it.path()) && !Repository::isInPitIgnore(it.path()))
+        {
+            cout << "Untracked: " << it.path().string() << endl;
+        }
+    }
 }
