@@ -2,14 +2,27 @@
 #define REPOSITORY_H
 
 #include <iostream>
+#include <map>
 #include <fstream>
 #include <filesystem>
 #include "core/gitObject.h"
 #include "core/StagingIndex.h"
 #include "utils/fileCRUD.h"
+
 using namespace std::filesystem;
 using namespace std;
 namespace fs = filesystem;
+
+struct indexEntry; // to remove the error
+enum FileStatus
+{
+    File_Same,
+    File_NotExist,
+    File_ContentsDiffer,
+    File_Nothing,
+};
+FileStatus sToFileStatus(string str);
+string fileStatusToS(FileStatus fileStatus);
 
 class TreeNode;
 class Repository
@@ -40,9 +53,18 @@ public:
     static string currentBranch();
     static string BranchPointToHashOrNothing(string branch);
     static void UpdateBranchHash(string branch, string hash);
+    static string getBranchHash(string branch);
     static string StoreTreeRec(TreeNode *node);
 
     static bool isInPitIgnore(fs::path pathtoCheck);
+
+    // comparisions
+    static FileStatus IndexWorkingDirComp(indexEntry iE, fs::path filePath);
+
+    static FileStatus IndexLastCommitComp(indexEntry iE, string lastCommitFileHash);
+
+    static map<path,treeEntry> FlattenTreeObject(TreeObject TObj, path prefix = path());
+    
 };
 
 #endif

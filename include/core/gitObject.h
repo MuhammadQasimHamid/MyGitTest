@@ -25,6 +25,7 @@ struct treeEntry
     GitObjectType type;
     string hash;
     string name;
+    treeEntry(){} // default contructor is must when using the treeEntry in a hashmap as a value ( required when treeEntry used as a key)
     treeEntry(string mode, GitObjectType type, string hash, string name)
     {
         this->mode = mode;

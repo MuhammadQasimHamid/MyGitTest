@@ -2,6 +2,7 @@
 #include <fstream>
 #include <filesystem>
 #include <algorithm>
+#include <map>
 #include "core/repository.h"
 #include "core/gitObject.h"
 #include "core/StagingIndex.h"
@@ -10,25 +11,23 @@
 #include "utils/myparser.h"
 #include "utils/mysha1.h"
 
-
-
 FileStatus sToFileStatus(string str)
 {
-    if(str == "same")
+    if (str == "same")
         return File_Same;
-    if(str == "not exist")
+    if (str == "not exist")
         return File_NotExist;
-    if(str == "contents differ")
+    if (str == "contents differ")
         return File_ContentsDiffer;
     return File_Nothing;
 }
 string fileStatusToS(FileStatus fileStatus)
 {
-    if(fileStatus == File_Same)
+    if (fileStatus == File_Same)
         return "same";
-    if(fileStatus ==  File_NotExist)
+    if (fileStatus == File_NotExist)
         return "not exist";
-    if(fileStatus ==  File_ContentsDiffer)
+    if (fileStatus == File_ContentsDiffer)
         return "contents differ";
     return "nothing";
 }
@@ -83,7 +82,7 @@ bool Repository::initRepo() // returns true if repo initialized successfully
             // }
             // headFile.close();
             // .git/StagingIndex::
-            writeFile(HEADFilePath, "ref: refs/heads/master\n");
+            writeFile(HEADFilePath, "ref: refs/heads/master");
             // ofstream indexFile(indexFilePath);
             // indexFile.close();
             writeFile(indexFilePath);
@@ -145,8 +144,8 @@ void Repository::generateCommit(string msg)
     parentHashs.push_back(BranchPointToHashOrNothing(currentBranch()));
     CommitObject CObj(treeHash, parentHashs, "Umar", msg, "12/12/12");
     storeObject(CObj);
-    StagingIndex::indexEntries.clear();
-    StagingIndex::save();
+    // StagingIndex::indexEntries.clear();
+    // StagingIndex::save();
     UpdateBranchHash(currentBranch(), CObj.getHash());
 }
 
@@ -237,6 +236,11 @@ void Repository::UpdateBranchHash(string branch, string hash)
     cout << "Branch Update: " << (branchFile.string()) << " hash: " << hash;
     writeFile(".pit/refs/heads/master", hash); // change it letter (we will not hardcode)
 }
+string Repository::getBranchHash(string branch)
+{
+    path branchFile = refsHeadFolderPath / branch;
+    return readFile(branchFile);
+}
 
 bool Repository::isInPitIgnore(fs::path pathtoCheck)
 {
@@ -253,16 +257,16 @@ bool Repository::isInPitIgnore(fs::path pathtoCheck)
 // Comparisons
 FileStatus Repository::IndexWorkingDirComp(indexEntry iE, fs::path filePath)
 {
-    
+
     // .pit/objects/2c/aaef87a6ef8ae6fa87ef6a8e76fa87ef
     fs::path indexFilePath = objectsFolderPath / iE.hash.substr(0, 2) / iE.hash.substr(2);
     if (exists(filePath))
     {
-        if (file_size(filePath) != file_size(indexFilePath) || last_write_time(filePath) != last_write_time(indexFilePath))
+        // if (file_size(filePath) != file_size(indexFilePath) || last_write_time(filePath) != last_write_time(indexFilePath))
         {
             string fileContents = readFile(filePath);
-            BlobObject BObj(filePath.filename().string(),fileContents);
-            if(BObj.getHash() != iE.hash)
+            BlobObject BObj(filePath.filename().string(), fileContents);
+            if (BObj.getHash() != iE.hash)
                 return File_ContentsDiffer;
         }
         return File_Same;
@@ -270,3 +274,33 @@ FileStatus Repository::IndexWorkingDirComp(indexEntry iE, fs::path filePath)
     else
         return File_NotExist;
 }
+
+FileStatus Repository::IndexLastCommitComp(indexEntry iE, string lastCommitFileHash)
+{
+    if (lastCommitFileHash == "")
+        return File_NotExist;
+    if (iE.hash == lastCommitFileHash)
+        return File_Same;
+    return File_ContentsDiffer;
+}
+
+
+map<path,treeEntry> Repository::FlattenTreeObject(TreeObject TObj, path prefix)
+{
+        map<path,treeEntry> flattenTreeEntries;
+
+        for (auto tE : TObj.entires)
+        {
+            if (tE.type == Blob)
+                flattenTreeEntries[(prefix / tE.name)] = tE;
+            else if (tE.type == Tree)
+            {
+                string rawContents = readFileWithStoredObjectHash(tE.hash);
+                TreeObject subTreeObj(rawContents);
+                map<path,treeEntry> subFlattenTree = FlattenTreeObject(subTreeObj, prefix / tE.name  );
+                for(auto stE: subFlattenTree)
+                    flattenTreeEntries[stE.first] = stE.second;
+            }
+        }
+        return flattenTreeEntries;
+    }

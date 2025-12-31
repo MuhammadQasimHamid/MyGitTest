@@ -62,7 +62,7 @@ bool StagingIndex::isTrackedFile(const path &filePath)
 {
     for (const auto &iE : indexEntries)
     {
-        if (iE.path == filePath.string())
+        if (iE.path == relative(absolute(filePath), Repository::project_absolute).string())// compare paths correctly
         {
             return true;
         }
@@ -74,7 +74,7 @@ indexEntry *StagingIndex::getEntry(const path &filePath)
 {
     for (auto &iE : indexEntries)
     {
-        if (iE.path == filePath.string())
+        if (iE.path == relative(absolute(filePath), Repository::project_absolute).string())// compare paths correctly
         {
             return &iE;
         }
@@ -144,7 +144,7 @@ bool StagingIndex::addDirectory(const path &dirPath)
             string filename = entry.path().filename().string();
 
             // Check if current directory is .git or .pit
-            if (is_directory(entry.path()) && (filename == ".git" || filename == ".pit" || filename == "node_modules" || filename == ".svn" || filename == ".vscode" || filename == "__pycache__" || filename == ".gitignore"))
+            if (is_directory(entry.path()) && (filename == ".git" || filename == ".pit" || filename == "node_modules" || filename == ".svn" || filename == ".vscode" || filename == "__pycache__" || filename == ".gitignore" || filename == "build"))
             {
                 cout << "Skipping system directory and its contents: " << entry.path() << endl;
                 // This prevents the iterator from entering this folder

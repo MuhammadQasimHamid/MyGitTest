@@ -11,7 +11,7 @@
 void writeFile(const std::filesystem::path &filePath, const std::string &content = "");
 
 std::string readFile(const std::filesystem::path &filePath);
-
+std::string readFileWithStoredObjectHash(const std::string &hash);
 void writeFileWithBytes(const std::string &path, const std::vector<unsigned char> &data);
 
 
