@@ -14,18 +14,27 @@ void statusCommandExe(int argc, char *argv[])
     bool stagedChangesExist = false, unstagedChangesExist = false;
     cout << "On Branch " << Repository::currentBranch() << endl;
 
-    cout << "Changes to be committed:" << endl;
+    cout << "Changes to be committed:" << endl; // index - last commit
     string cBranch = Repository::currentBranch();
     string cBranchHash = Repository::getBranchHash(cBranch);
-    string rawFileContentsCommit = readFileWithStoredObjectHash(cBranchHash);
-    CommitObject CObj(rawFileContentsCommit);
-    string rawFileContentsTree = readFileWithStoredObjectHash(CObj.treeHash);
-    TreeObject TObj(rawFileContentsTree);
-    map<path, treeEntry> flattenTree = Repository::FlattenTreeObject(TObj);
+    map<path, treeEntry> flattenTree;
+    if(cBranchHash == "")
+    {
+        
+    }
+    else // fill the flatten tree
+    {
+        string rawFileContentsCommit = readFileWithStoredObjectHash(cBranchHash);
+        CommitObject CObj(rawFileContentsCommit);
+        string rawFileContentsTree = readFileWithStoredObjectHash(CObj.treeHash);
+        TreeObject TObj(rawFileContentsTree);
+        flattenTree = Repository::FlattenTreeObject(TObj);
+    }
+
     // cout << "Comparing with Last Commit: " << StagingIndex::indexEntries.size() <<"" << endl;
     for (auto iE : StagingIndex::indexEntries)
     {
-        cout << "                 ";
+        cout << "";
         if (flattenTree.find(iE.path) != flattenTree.end())
         {
             FileStatus fStatus = Repository::IndexLastCommitComp(iE, (flattenTree[iE.path]).hash);
@@ -39,15 +48,15 @@ void statusCommandExe(int argc, char *argv[])
         }
         else
         {
-            cout << "not exist " << iE.path << endl;
+            cout << "new file " << iE.path << endl;
         }
     }
     cout << "End" << endl;
 
-    cout << "Changes not staged for commit:" << endl;
+    cout << "Changes not staged for commit:" << endl; // working dir - index
     for (auto iE : StagingIndex::indexEntries)
     {
-        cout << "                 ";
+        cout << "";
         FileStatus fStatus = Repository::IndexWorkingDirComp(iE, iE.path);
         // cout << fileStatusToS(fStatus) << " " << iE.path << endl;
         if (fStatus == File_ContentsDiffer)

@@ -6,7 +6,7 @@ using namespace std;
 
 void commitCommandExe(int argc, char *argv[])
 {
-    // pit commit -m "OkOk"
+    // pit commit -m "OkOkOk"
     if (argc == 4)
     {
         string flag = argv[3 - 1];

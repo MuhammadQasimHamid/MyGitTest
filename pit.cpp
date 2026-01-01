@@ -50,9 +50,10 @@ int main(int argc, char *argv[])
         cout << "Function Testing---Start" << endl;
         // string fileContents = readFileWithStoredObjectHash("4c3lla28fee213ff64818e0ec871e401639071fda2"); done
         // cout << fileContents << endl;    done
+        // addCommandExe(3, (char*[]){"", "add", "."});    
         // char* ar[]= {"","commit","-m","test"};
         // commitCommandExe(4,ar);
-        statusCommandExe(argc, argv);    
+        statusCommandExe(argc, argv);
         // cout << Repository::getBranchHash("master")  ; done
         
         cout << "Function Testing---End" << endl;

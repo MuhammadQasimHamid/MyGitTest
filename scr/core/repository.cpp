@@ -118,9 +118,9 @@ string Repository::storeObject(GitObject gitObj)
         {
 
             create_directory(objectDirPath);
-            writeFile(objectFilePath, gitObj.serialize());
-            cout << "Object Saved:(" << gitObj.getHash() << ")     " << gitObj.serialize();
         }
+        writeFile(objectFilePath, gitObj.serialize());
+        cout << "Object Saved:(" << gitObj.getHash() << ")     " << gitObj.serialize();
     }
     catch (const exception &e)
     {
@@ -179,8 +179,8 @@ string Repository::StoreTreeRec(TreeNode *node)
         string childHash = StoreTreeRec(child);
 
         treeEntry entry = treeEntry(child->mode, child->isFile ? Blob : Tree, childHash, child->name);
-        entry.name = child->name;
-        entry.hash = childHash;
+        // entry.name = child->name;
+        // entry.hash = childHash;
 
         if (child->isFile)
             entry.mode = "100644";
@@ -242,19 +242,49 @@ string Repository::getBranchHash(string branch)
     return readFile(branchFile);
 }
 
-bool Repository::isInPitIgnore(fs::path pathtoCheck)
+// bool Repository::isInPitIgnore(fs::path pathtoCheck)
+// {
+//     string fileContents = readFile(pitIgnoreFilePath);
+//     vector<string> lines = split(fileContents, '\n');
+//     for (string l : lines)
+//     {
+//             if( l ==  relative(absolute(pathtoCheck), Repository::project_absolute).string() || is_a_subfolder(path(l),pathtoCheck))
+//             return true;
+//     }
+//     return false;
+// }
+
+
+bool Repository::isInPitIgnore(fs::path pathToCheck)
 {
+
+    fs::path relPath = normalize_relative(pathToCheck);
+
     string fileContents = readFile(pitIgnoreFilePath);
     vector<string> lines = split(fileContents, '\n');
-    for (string l : lines)
+
+    for (string rule : lines)
     {
-            if( l ==  relative(absolute(pathtoCheck), Repository::project_absolute).string())// compare paths correctly || is_a_subfolder(path(l),pathtoCheck))
+        if (rule.empty())
+            continue;
+
+        fs::path rulePath = fs::path(rule).lexically_normal();
+
+        // 1. Exact file name match (e.g. test.exe)
+        if (relPath.filename() == rulePath)
+            return true;
+
+        // 2. Exact path match
+        if (relPath == rulePath)
+            return true;
+
+        // 3. Directory ignore (build/, .git/, etc.)
+        if (is_subpath(rulePath, relPath))
             return true;
     }
+
     return false;
 }
-
-
 
 // Comparisons
 FileStatus Repository::IndexWorkingDirComp(indexEntry iE, fs::path filePath)
@@ -286,24 +316,46 @@ FileStatus Repository::IndexLastCommitComp(indexEntry iE, string lastCommitFileH
         return File_Same;
     return File_ContentsDiffer;
 }
-
-
-map<path,treeEntry> Repository::FlattenTreeObject(TreeObject TObj, path prefix)
+ FileStatus Repository::WorkingDirCommitComp(path filePath,string commitTreeFileHash)
 {
-        map<path,treeEntry> flattenTreeEntries;
-
-        for (auto tE : TObj.entires)
-        {
-            if (tE.type == Blob)
-                flattenTreeEntries[(prefix / tE.name)] = tE;
-            else if (tE.type == Tree)
-            {
-                string rawContents = readFileWithStoredObjectHash(tE.hash);
-                TreeObject subTreeObj(rawContents);
-                map<path,treeEntry> subFlattenTree = FlattenTreeObject(subTreeObj, prefix / tE.name  );
-                for(auto stE: subFlattenTree)
-                    flattenTreeEntries[stE.first] = stE.second;
-            }
-        }
-        return flattenTreeEntries;
+    try
+    {
+        
+        string rawFile = readFile(filePath);
+        BlobObject bObj(filePath.filename().string(),rawFile); // calling normal construction DD
+        string hash = bObj.getHash();
+        if(hash == commitTreeFileHash)
+            return File_Same;
+        else
+            return File_ContentsDiffer;
     }
+    catch(...)
+    {
+        return File_NotExist;
+    }
+    
+    
+
+}
+
+
+
+map<path, treeEntry> Repository::FlattenTreeObject(TreeObject TObj, path prefix)
+{
+    map<path, treeEntry> flattenTreeEntries;
+
+    for (auto tE : TObj.entires)
+    {
+        if (tE.type == Blob)
+            flattenTreeEntries[(prefix / tE.name)] = tE;
+        else if (tE.type == Tree)
+        {
+            string rawContents = readFileWithStoredObjectHash(tE.hash);
+            TreeObject subTreeObj(rawContents);
+            map<path, treeEntry> subFlattenTree = FlattenTreeObject(subTreeObj, prefix / tE.name);
+            for (auto stE : subFlattenTree)
+                flattenTreeEntries[stE.first] = stE.second;
+        }
+    }
+    return flattenTreeEntries;
+}

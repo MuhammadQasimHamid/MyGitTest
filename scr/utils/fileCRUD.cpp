@@ -46,7 +46,7 @@ string readFile(const filesystem::path &filePath)
     }
     else
     {
-        cout << "Error: " << filePath << " doesn't exist" << endl;
+        throw("Error: " + filePath.string() + " doesn't exist" );
     }
     file.close();
     return contents;
@@ -86,6 +86,11 @@ void writeFileWithBytes(const string &path, const vector<unsigned char> &data)
     file.close();
 }
 
+void deleteFile(const path filePath)
+{
+    std::filesystem::remove(filePath);
+}
+
 bool is_a_subfolder( path base,path child)
 {
     // Normalize both paths lexically
@@ -106,4 +111,23 @@ bool is_a_subfolder( path base,path child)
     // then the child is a subfolder (or is the same path)
     bool res = mismatch_pair.first == normal_base.end();
     return res;
+}
+
+bool is_subpath(const fs::path& parent, const fs::path& child)
+{
+    auto p_it = parent.begin();
+    auto c_it = child.begin();
+
+    for (; p_it != parent.end() && c_it != child.end(); ++p_it, ++c_it)
+    {
+        if (*p_it != *c_it)
+            return false;
+    }
+    return p_it == parent.end();
+}
+
+fs::path normalize_relative(const fs::path &p)
+{
+    return fs::relative(fs::absolute(p), Repository::project_absolute)
+        .lexically_normal();
 }

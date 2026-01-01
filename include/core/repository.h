@@ -63,6 +63,7 @@ public:
 
     static FileStatus IndexLastCommitComp(indexEntry iE, string lastCommitFileHash);
 
+    static FileStatus WorkingDirCommitComp(path filePath,string commitHash);
     static map<path,treeEntry> FlattenTreeObject(TreeObject TObj, path prefix = path());
     
 };
