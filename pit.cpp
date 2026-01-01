@@ -20,6 +20,7 @@ void commitCommandExe(int argc, char *argv[]);
 void statusCommandExe(int argc, char *argv[]); 
 void checkoutCommandExe(int argc, char *argv[]); 
 void catfileCommandExe(int argc, char *argv[]);
+void logCommandExe(int argc, char *argv[]);
 map<string, cmdFunc> cmdCodes;
 
 void callFunc(int argc, char *argv[]);
@@ -34,7 +35,9 @@ void loadConfiguraion()
     cmdCodes["status"] = statusCommandExe;
     cmdCodes["checkout"] = checkoutCommandExe;
     cmdCodes["cat-file"] = catfileCommandExe;
-    Repository::InitializeClass();
+    cmdCodes["log"] = logCommandExe;
+    // if(pitRepoExists())
+        Repository::InitializeClass();
 }
 int main(int argc, char *argv[])
 {
@@ -50,10 +53,13 @@ int main(int argc, char *argv[])
         cout << "Function Testing---Start" << endl;
         // string fileContents = readFileWithStoredObjectHash("4c3lla28fee213ff64818e0ec871e401639071fda2"); done
         // cout << fileContents << endl;    done
-        // addCommandExe(3, (char*[]){"", "add", "."});    
+            // initCommandExe(2, (char*[]){"", "init"});
+        // addCommandExe(3, (char*[]){"", "add", "."});  
+
         // char* ar[]= {"","commit","-m","test"};
         // commitCommandExe(4,ar);
-        statusCommandExe(argc, argv);
+        // statusCommandExe(argc, argv);
+        checkoutCommandExe(3, (char*[]){"","checkout","acf6d5cf09178bf8c91c0d67ba018e4ab3739db2"});
         // cout << Repository::getBranchHash("master")  ; done
         
         cout << "Function Testing---End" << endl;

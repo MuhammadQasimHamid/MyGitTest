@@ -51,7 +51,7 @@ GitObject::GitObject(string serializedObject) // deserialize object
         string header = serializedObject.substr(0, serializedObject.find('\0'));
         this->contents = serializedObject.substr(serializedObject.find('\0') + 1);
     
-        vector<string> parts = split(header, '\n');
+        vector<string> parts = split(header, ' ');
         objectType = stoGitObjectType(parts[0]);
     }
     catch(...)
@@ -119,7 +119,7 @@ CommitObject::CommitObject(string serializedObject) : GitObject(serializedObject
                     if (parts.size() == 2)
                         parentHash.push_back(parts[1]);
                     else
-                        parentHash.push_back(""); // if no parent then use space only
+                        parentHash.push_back(""); // if no parent then use space only (Keep in mind)
                 }
                 else if (key == "author")
                 {

@@ -25,20 +25,25 @@ void checkoutCommandExe(int argc, char *argv[])
             {
                 path FlattenfilePath = it.first;
                 treeEntry tE = it.second;
+                cout << FlattenfilePath;
                 if(StagingIndex::isTrackedFile(FlattenfilePath) )
-                {
+                {   
                     FileStatus fStatus =  Repository::WorkingDirCommitComp(FlattenfilePath,tE.hash);
-                    if(fStatus == File_ContentsDiffer)
+                    if(fStatus == File_ContentsDiffer || fStatus == File_NotExist)
                     {
+                        cout <<  "         Contents Differ";
                         string blobRawFileContents = readFileWithStoredObjectHash(tE.hash);
-                        writeFile(FlattenfilePath,blobRawFileContents); // Re-write
+                        BlobObject bObj(blobRawFileContents); // deserilized constructor called
+                        writeFile(FlattenfilePath,bObj.contents); // Re-write
                     }
                     else if(fStatus == File_NotExist)
                     {
+                        cout <<  "         Write file";
                         string blobRawFileContents = readFileWithStoredObjectHash(tE.hash);
-                        writeFile(FlattenfilePath,blobRawFileContents); // Re-write
+                            BlobObject bObj(blobRawFileContents); // deserilized constructor called
+                            writeFile(FlattenfilePath,bObj.contents); // Re-write
                     }
-                    else if(fStatus != File_Nothing)
+                    else if(fStatus != File_Nothing) // fStatus is not above options and it is also != File_Nothing
                     {
                         deleteFile(FlattenfilePath);
                     }

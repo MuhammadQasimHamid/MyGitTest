@@ -74,6 +74,14 @@ string readFileWithStoredObjectHash(const string &hash)
     file.close();
     return contents;
 }
+bool storedObjectExistsWithHash(const string &hash) 
+{
+    path filePath = Repository::objectsFolderPath / hash.substr(0, 2) / hash.substr(2);
+    if (exists(filePath))
+        return true;
+    return false;
+}
+
 
 void writeFileWithBytes(const string &path, const vector<unsigned char> &data)
 {
