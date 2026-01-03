@@ -17,14 +17,14 @@ void initCommandExe(int argc, char *argv[]);
 void addCommandExe(int argc, char *argv[]);
 void helpCommandExe(int argc, char *argv[]);
 void commitCommandExe(int argc, char *argv[]);
-void statusCommandExe(int argc, char *argv[]); 
-void checkoutCommandExe(int argc, char *argv[]); 
+void statusCommandExe(int argc, char *argv[]);
+void checkoutCommandExe(int argc, char *argv[]);
 void catfileCommandExe(int argc, char *argv[]);
 void logCommandExe(int argc, char *argv[]);
 map<string, cmdFunc> cmdCodes;
 
 void callFunc(int argc, char *argv[]);
-bool pitRepoExists(); 
+bool pitRepoExists();
 void printArgs(int argc, char *argv[]);
 void loadConfiguraion()
 {
@@ -41,7 +41,7 @@ void loadConfiguraion()
 }
 int main(int argc, char *argv[])
 {
-    printArgs(argc,argv);
+    printArgs(argc, argv);
     loadConfiguraion();
     cout << "Pit Refreshed" << endl;
     if (argc > 1)
@@ -71,28 +71,28 @@ int main(int argc, char *argv[])
 
 void callFunc(int argc, char *argv[])
 {
-    
+
     string cmdStr = argv[1];
     if (cmdCodes.find(cmdStr) == cmdCodes.end())
     {
         cout << "Invalid Command" << endl;
         return;
     }
-    if(pitRepoExists() || cmdStr == "init")
+    if (pitRepoExists() || cmdStr == "init")
     {
         Repository::InitializeClass();
         cmdCodes[cmdStr](argc, argv);
     }
     else
-    {   
-        cout << "Pit repo not exists in this directory..." <<endl;
+    {
+        cout << "Pit repo not exists in this directory..." << endl;
         cout << "(Type: 'pit init' to initialize pit repo)." << endl;
     }
 }
 
 bool pitRepoExists()
 {
-    if(exists(".pit"))
+    if (exists(".pit"))
     {
         return true;
     }
@@ -101,9 +101,9 @@ bool pitRepoExists()
 
 void printArgs(int argc, char *argv[])
 {
-    cout << "Arg Count: "<< argc << endl;
+    cout << "Arg Count: " << argc << endl;
     cout << "Arg Values: ";
-    for(int i = 0; i < argc; i++)
+    for (int i = 0; i < argc; i++)
     {
         cout << argv[i] << " ";
     }

@@ -205,18 +205,6 @@ string Repository::StoreTreeRec(TreeNode *node)
 
 string Repository::currentBranch()
 {
-    //     string line;
-    //     fstream headFile(HEADFilePath, ios::in); // this file stores pointer to branches
-    //     if (headFile.is_open())
-    //     {
-    //         // stores current branch in /HEAD
-    //         getline(headFile, line);
-    //         vector<string> parts = split(line, ' ');
-    //         path refPath = parts[1];
-    //         return refPath.filename().string();
-    //     }
-    //     return "DETACHED HEAD";
-
     string line = readFile(HEADFilePath);
     vector<string> parts = split(line, ' ');
     path refPath = parts[1];
