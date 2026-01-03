@@ -5,6 +5,8 @@
 #include "core/StagingIndex.h"
 #include "utils/colors.h"
 #include "dataStructure/Ntree.h"
+#include "utils/json_helper.h"
+
 using namespace std;
 // #undef byte
 // #include <windows.h>
@@ -15,121 +17,157 @@ void setColor(int fore, int back)
 }
 void statusCommandExe(int argc, char *argv[])
 {
-    bool stagedChangesExist = false, unstagedChangesExist = false;
-    cout << "On Branch " << Repository::currentBranch() << endl;
-    cout << endl;
-    cout << "Changes to be committed:" << endl; // index - last commit
-    cout << "  (use 'git restore --staged <file>...' to unstage)" << endl;
-    string cBranch = Repository::currentBranch();
-    string cBranchHash = Repository::getBranchHash(cBranch);
+    // parse args early so we can suppress human output when --json is given
+    bool jsonMode = false;
+    for (int i = 1; i < argc; ++i)
+        if (string(argv[i]) == "--json")
+            jsonMode = true;
+
+    struct FileChange
+    {
+        string path;
+        string type;
+    };
+    vector<FileChange> stagedChanges;   // keeps path + type (modified/new/deleted)
+    vector<FileChange> unstagedChanges; // keeps path + type (modified/deleted)
+    vector<string> stagedFiles;         // for json output (paths)
+    vector<string> unstagedFiles;       // for json output (paths)
+    vector<string> untrackedFiles;      // for json output (paths)
+
+    const string branch = Repository::currentBranch();
+    const string cBranchHash = Repository::getBranchHash(branch);
+
+    // Build compare map between index and last commit
     map<path, treeEntry> flattenTree;
     cmpMap<path, indexEntry, treeEntry> cmpMapiEtE;
-    for (auto iE : StagingIndex::indexEntries)
+    for (const auto &iE : StagingIndex::indexEntries)
         cmpMapiEtE.addVal1(iE.path, iE);
-    if (cBranchHash == "")
-    {
-    }
-    else // fill the flatten tree
+
+    if (!cBranchHash.empty())
     {
         string rawFileContentsCommit = readFileWithStoredObjectHash(cBranchHash);
         CommitObject CObj(rawFileContentsCommit);
         string rawFileContentsTree = readFileWithStoredObjectHash(CObj.treeHash);
         TreeObject TObj(rawFileContentsTree);
         flattenTree = Repository::FlattenTreeObject(TObj);
-        // key value1 value2
-        for (auto keyValuePair : flattenTree)
-            cmpMapiEtE.addVal2(keyValuePair.first, keyValuePair.second);
+        for (auto &kv : flattenTree)
+            cmpMapiEtE.addVal2(kv.first, kv.second);
     }
 
-    // cout << "Comparing with Last Commit: " << StagingIndex::indexEntries.size() <<"" << endl;
-    for (auto cmpRow : cmpMapiEtE.umap)
+    // Compare index vs last commit (staged changes)
+    for (auto &cmpRow : cmpMapiEtE.umap)
     {
         const path &key = cmpRow.first;
-        string filename = key.filename().string();
+        const string filepath = key.generic_string();
         cmpPair iEtEPair = cmpRow.second;
         Cmp_Status cmpStatus = Repository::IndexCommitComp(iEtEPair.getVal1(), iEtEPair.getVal2().hash);
         if (cmpStatus == CMP_DIFFER)
         {
-            stagedChangesExist = true;
-            cout << GREEN << "\tmodified:" << "    " << filename << RESETCOLOR << endl;
+            stagedChanges.push_back({filepath, "modified"});
+            stagedFiles.push_back(filepath);
         }
-        else if (!iEtEPair.val2Exists()) // not exist in haeda
+        else if (!iEtEPair.val2Exists()) // not exist in head
         {
-            stagedChangesExist = true;
-            cout << GREEN << "\tnew file:" << "    " << filename << RESETCOLOR << endl;
+            stagedChanges.push_back({filepath, "new file"});
+            stagedFiles.push_back(filepath);
         }
         else if (!iEtEPair.val1Exists()) // not exist in index
         {
-            stagedChangesExist = true;
-            cout << GREEN << "\tdeleted:" << "    " << filename << RESETCOLOR << endl;
+            stagedChanges.push_back({filepath, "deleted"});
+            stagedFiles.push_back(filepath);
         }
     }
 
-    cout << "Changes not staged for commit:" << endl; // working dir - index
-    for (auto iE : StagingIndex::indexEntries)
+    // Compare working dir vs index (unstaged changes)
+    for (const auto &iE : StagingIndex::indexEntries)
     {
-        cout << "";
         Cmp_Status cmpStatus = Repository::IndexWorkingDirComp(iE, iE.path);
-        // cout << fileStatusToS(fStatus) << " " << iE.path << endl;
         if (cmpStatus == CMP_DIFFER)
         {
-            unstagedChangesExist = true;
-            cout << RED << "\tmodified" << " " << iE.path << RESETCOLOR << endl;
+            unstagedChanges.push_back({iE.path, "modified"});
+            unstagedFiles.push_back(iE.path);
         }
         else if (cmpStatus == CMP_IN_WR_NotExist_WR)
         {
-            unstagedChangesExist = true;
-            cout << RED << "\tdeleted" << " " << iE.path << RESETCOLOR << endl;
+            unstagedChanges.push_back({iE.path, "deleted"});
+            unstagedFiles.push_back(iE.path);
         }
     }
 
-    if (!stagedChangesExist && !unstagedChangesExist)
+    // Collect untracked files (always collect, print only in human mode)
+    traverseDirectory(".", [&](const fs::path &relPath)
+                      {
+        if (!StagingIndex::isTrackedFile(relPath))
+            untrackedFiles.push_back(relPath.generic_string()); });
+
+    // If json mode, print only JSON and exit early
+    if (jsonMode)
     {
-        cout << "Working Area Clean, nothing to commit" << endl;
+        statusJSON(branch, stagedFiles, unstagedFiles, untrackedFiles);
+        return;
     }
+
+    // Human readable output
+    cout << "On Branch " << branch << endl
+         << endl;
+
+    cout << "Changes to be committed:" << endl; // index - last commit
+    cout << "  (use 'git restore --staged <file>...' to unstage)" << endl;
+    if (stagedChanges.empty())
+    {
+        cout << "\t(no changes added to commit)" << endl;
+    }
+    else
+    {
+        for (const auto &c : stagedChanges)
+        {
+            const auto filename = fs::path(c.path).filename().string();
+            if (c.type == "modified")
+                cout << GREEN << "\tmodified:" << "    " << filename << RESETCOLOR << endl;
+            else if (c.type == "new file")
+                cout << GREEN << "\tnew file:" << "    " << filename << RESETCOLOR << endl;
+            else
+                cout << GREEN << "\tdeleted:" << "    " << filename << RESETCOLOR << endl;
+        }
+    }
+
+    cout << "Changes not staged for commit:" << endl;
+    if (unstagedChanges.empty())
+    {
+        cout << "\t(none)" << endl;
+    }
+    else
+    {
+        for (const auto &c : unstagedChanges)
+        {
+            if (c.type == "modified")
+                cout << RED << "\tmodified" << " " << c.path << RESETCOLOR << endl;
+            else
+                cout << RED << "\tdeleted" << " " << c.path << RESETCOLOR << endl;
+        }
+    }
+
+    if (stagedChanges.empty() && unstagedChanges.empty())
+        cout << "Working Area Clean, nothing to commit" << endl;
 
     cout << "Untracked files:" << endl;
     cout << "(use \" git add<file>... \" to include in what will be committed)" << endl;
-    traverseDirectory(".", [](const fs::path &relPath)
-                      {
-            if(!StagingIndex::isTrackedFile(relPath))
-                std::cout <<RED <<"\tUntracked: " << relPath.generic_string() << RESETCOLOR << std::endl; });
+    for (const auto &u : untrackedFiles)
+        cout << RED << "\tUntracked: " << u << RESETCOLOR << endl;
 }
 
-// fs::path relPath;
-// std::string rel;
-//     for (fs::recursive_directory_iterator it(
-//          Repository::project_absolute,
-//          fs::directory_options::skip_permission_denied);
-//      it != fs::recursive_directory_iterator();
-//      ++it)
-// {
-//         const fs::directory_entry &entry = *it;
+void statusJSON(
+    const std::string &branch,
+    const std::vector<std::string> &staged,
+    const std::vector<std::string> &unstaged,
+    const std::vector<std::string> &untracked)
+{
+    using namespace json;
 
-//         // skip hidden dirs
-//         bool skip = false;
-//         for (fs::path p = entry.path(); !p.empty(); p = p.parent_path())
-//         {
-//             auto name = p.filename().string();
-//             if (name == ".git" || name == ".pit")
-//             {
-//                 if (entry.is_directory())
-//                     it.disable_recursion_pending();
-//                 skip = true;
-//                 break;
-//             }
-//         }
-//         if (skip)
-//             continue; // safe early exit
-
-//         // initialize after skip check
-//         relPath = fs::relative(entry.path(), Repository::project_absolute);
-//         rel = relPath.generic_string();
-
-//         // check untracked
-//         if (!StagingIndex::isTrackedFile(rel) && true)
-//             // !Repository::isInPitIgnore(rel))
-//         {
-//             std::cout << RED << "Untracked: " << rel << std::endl;
-//         }
-//     }
+    beginObject();
+    printString("branch", branch);
+    printArray("staged", staged);
+    printArray("unstaged", unstaged);
+    printArray("untracked", untracked, false);
+    endObject();
+}
