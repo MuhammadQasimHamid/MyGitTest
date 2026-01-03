@@ -8,6 +8,8 @@
 #include "utils/myparser.h"
 using namespace std;
 
+struct treeEntry;
+
 // Global Funcion Implementation
 GitObjectType stoGitObjectType(string str)
 {
@@ -45,13 +47,18 @@ GitObject::GitObject(GitObjectType objType, string contents)
 
 GitObject::GitObject(string serializedObject) // deserialize object
 {
-    string header = serializedObject.substr(0, serializedObject.find('\0'));
-    this->contents = serializedObject.substr(serializedObject.find('\0') + 1);
-
-    vector<string> parts = split(header, '\n');
-    objectType = stoGitObjectType(parts[0]);
-
-
+    try{
+        string header = serializedObject.substr(0, serializedObject.find('\0'));
+        this->contents = serializedObject.substr(serializedObject.find('\0') + 1);
+    
+        vector<string> parts = split(header, ' ');
+        objectType = stoGitObjectType(parts[0]);
+    }
+    catch(...)
+    {
+        cout << "Error in GitObject deserialization" << endl;
+        cout << "Serialized Object: " << serializedObject << endl;
+    }
 }
 
 // GitObject Funcitions Implementation
@@ -94,22 +101,37 @@ CommitObject::CommitObject(string treeHash, vector<string> parentHash, string au
 }
 CommitObject::CommitObject(string serializedObject) : GitObject(serializedObject) // desterilize contents
 {
+    bool msg = false;
+    // cout << "Commit Object COnstructor Called" << endl;
     vector<string> lines = split(contents, '\n');
     for (auto l : lines)
     {
-        vector<string> parts = split(l, ' '); // divide line into parts
-        string key = parts[0];                // heading of the part
-        if (key == "tree")
-            treeHash = parts[1];
-        else if (key == "parent")
-            parentHash.push_back(parts[1]);
-        else if (key == "author")
+        if (!msg)
         {
-            author = parts[1];
-            timeStamp = parts[2];
+            vector<string> parts = split(l, ' '); // divide line into parts
+            if (parts.size() > 0)
+            {
+                string key = parts[0]; // heading of the part
+                if (key == "tree")
+                    treeHash = parts[1];
+                else if (key == "parent")
+                {
+                    if (parts.size() == 2)
+                        parentHash.push_back(parts[1]);
+                    else
+                        parentHash.push_back(""); // if no parent then use space only (Keep in mind)
+                }
+                else if (key == "author")
+                {
+                    author = parts[1];
+                    timeStamp = parts[2] + " " + parts[3]; // 12/12/12 +0000
+                }
+            }
+            else if (parts.size() == 0)
+                msg = true;
         }
         else
-            message = l;
+            message += l + "\n";
     }
 }
 
@@ -135,11 +157,13 @@ TreeObject::TreeObject() : GitObject(Tree, "")
 }
 TreeObject::TreeObject(string serilizedObject) : GitObject(serilizedObject) // desterilieze (contents to TreeObject)
 {
+    // cout << "TreeObject Constructor Called" << endl;
     vector<string> lines = split(contents, '\n');
     for (auto l : lines)
     {
-        vector<string> parts = split(l, '\n');
-        entires.push_back(treeEntry(parts[0], stoGitObjectType(parts[1]), parts[2], parts[3]));
+        vector<string> parts = split(l, ' ');
+        treeEntry tE(treeEntry(parts[0], stoGitObjectType(parts[1]), parts[2], parts[3]));
+        entires.push_back(tE);
     }
 }
 

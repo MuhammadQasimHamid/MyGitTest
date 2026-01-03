@@ -33,19 +33,26 @@ void StagingIndex::updateEntry(const path &filePath, const string &newHash, cons
 }
 void StagingIndex::load()
 {
-    StagingIndex::indexEntries = {};
-    string indexFileContents = readFile(StagingIndex::indexFilePath);
-    vector<string> lines = split(indexFileContents, '\n');
-    for (auto l : lines)
+    try
     {
-        if (l.empty())
-            continue;
-        vector<string> parts = split(l, ' ');
-        if (parts.size() == 4)
+        StagingIndex::indexEntries = {};
+        string indexFileContents = readFile(StagingIndex::indexFilePath);
+        vector<string> lines = split(indexFileContents, '\n');
+        for (auto l : lines)
         {
-            indexEntry iE(parts[0], parts[1], parts[2], parts[3]);
-            StagingIndex::indexEntries.push_back(iE);
+            if (l.empty())
+                continue;
+            vector<string> parts = split(l, ' ');
+            if (parts.size() == 4)
+            {
+                indexEntry iE(parts[0], parts[1], parts[2], parts[3]);
+                StagingIndex::indexEntries.push_back(iE);
+            }
         }
+    }
+    catch (...)
+    {
+        // just ignore
     }
 }
 void StagingIndex::save()
@@ -62,7 +69,7 @@ bool StagingIndex::isTrackedFile(const path &filePath)
 {
     for (const auto &iE : indexEntries)
     {
-        if (iE.path == filePath.string())
+        if (iE.path == relative(absolute(filePath), Repository::project_absolute).string()) // compare paths correctly
         {
             return true;
         }
@@ -74,7 +81,7 @@ indexEntry *StagingIndex::getEntry(const path &filePath)
 {
     for (auto &iE : indexEntries)
     {
-        if (iE.path == filePath.string())
+        if (iE.path == relative(absolute(filePath), Repository::project_absolute).string()) // compare paths correctly
         {
             return &iE;
         }
@@ -89,6 +96,11 @@ bool StagingIndex::addPathToIndex(const path &dirPath)
     if (is_directory(relativePath))
     {
         addDirectory(relativePath);
+        if (relativePath == ".")
+        {
+            removeDeletedWRFilesFromIndex();
+            save(); // update
+        }
     }
     else if (is_regular_file(relativePath))
     {
@@ -99,6 +111,21 @@ bool StagingIndex::addPathToIndex(const path &dirPath)
         return false;
     }
     return true;
+}
+int StagingIndex::removeDeletedWRFilesFromIndex()
+{
+    int count = 0;
+    for (auto it = indexEntries.begin(); it != indexEntries.end();)
+    {
+        if (Repository::IndexWorkingDirComp(*it, it->path) == CMP_IN_WR_NotExist_WR)
+            {
+                it = indexEntries.erase(it);
+                count++;
+            }
+        else
+            ++it;
+    }
+    return count;    
 }
 bool StagingIndex::addFileToIndex(const path &filePath)
 {
@@ -144,7 +171,7 @@ bool StagingIndex::addDirectory(const path &dirPath)
             string filename = entry.path().filename().string();
 
             // Check if current directory is .git or .pit
-            if (is_directory(entry.path()) && (filename == ".git" || filename == ".pit" || filename == "node_modules" || filename == ".svn" || filename == ".vscode" || filename == "__pycache__" || filename == ".gitignore"))
+            if (is_directory(entry.path()) && (filename == ".git" || filename == ".pit" || filename == "node_modules" || filename == ".svn" || filename == ".vscode" || filename == "__pycache__" || filename == ".gitignore" || filename == "build"))
             {
                 cout << "Skipping system directory and its contents: " << entry.path() << endl;
                 // This prevents the iterator from entering this folder

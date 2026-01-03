@@ -1,6 +1,8 @@
 # Compiler and flags
 CXX = g++
 CXXFLAGS = -std=c++17 -Wall -Iinclude
+DEBUGFLAGS = -g -O0
+RELEASEFLAGS = -O2
 
 # Directories
 SRC_DIR = scr
@@ -20,7 +22,7 @@ SRC_CORE = $(wildcard $(CORE)/*.cpp)
 SRC_UTILS = $(wildcard $(UTILS)/*.cpp)
 SRC_MAIN = pit.cpp
 
-# Object files
+# Object files (mirroring scr folder structure)
 OBJ_COMMANDS = $(patsubst $(SRC_DIR)/%, $(OBJ_DIR)/%, $(SRC_COMMANDS:.cpp=.o))
 OBJ_DATASTRUCTURE = $(patsubst $(SRC_DIR)/%, $(OBJ_DIR)/%, $(SRC_DATASTRUCTURE:.cpp=.o))
 OBJ_CORE = $(patsubst $(SRC_DIR)/%, $(OBJ_DIR)/%, $(SRC_CORE:.cpp=.o))
@@ -33,8 +35,16 @@ OBJS = $(OBJ_COMMANDS) $(OBJ_CORE) $(OBJ_UTILS) $(OBJ_MAIN) $(OBJ_DATASTRUCTURE)
 # Output executable
 TARGET = $(BIN_DIR)/pit
 
-# Default target
-all: $(TARGET)
+# Default target: debug build
+all: debug
+
+# Debug build
+debug: CXXFLAGS += $(DEBUGFLAGS)
+debug: $(TARGET)
+
+# Release build
+release: CXXFLAGS += $(RELEASEFLAGS)
+release: $(TARGET)
 
 # Link all objects
 $(TARGET): $(OBJS)
@@ -53,4 +63,6 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 
 # Clean build files
 clean:
-	rm -rf $(OBJ_DIR)/*.o $(BIN_DIR)/pit
+	rm -rf $(OBJ_DIR) $(BIN_DIR)
+
+.PHONY: all debug release clean

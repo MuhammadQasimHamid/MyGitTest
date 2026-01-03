@@ -12,11 +12,9 @@ void catfileCommandExe(int argc, char *argv[])
         if (flag == "-p")
         {
             string hash = argv[3];
-            string FolderName = hash.substr(0,2);
-            string FileName = hash.substr(2);
-            if(exists(Repository::objectsFolderPath/FolderName/FileName))
+            if(storedObjectExistsWithHash(hash))
             {
-                string fileContents = readFile(Repository::objectsFolderPath/FolderName/FileName);
+                string fileContents = readFileWithStoredObjectHash(hash);
                 GitObject Gobj(fileContents ); //calling deserialze constructor
                 cout << "Raw File Contents: " << endl;
                 cout << "---------------------------------------------" << endl;
