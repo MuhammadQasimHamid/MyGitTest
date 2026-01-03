@@ -41,34 +41,29 @@ void statusCommandExe(int argc, char *argv[])
             cmpMapiEtE.addVal2(keyValuePair.first, keyValuePair.second);
     }
 
-    setColor(0, 5);
     // cout << "Comparing with Last Commit: " << StagingIndex::indexEntries.size() <<"" << endl;
     for (auto cmpRow : cmpMapiEtE.umap)
     {
         const path &key = cmpRow.first;
         string filename = key.filename().string();
         cmpPair iEtEPair = cmpRow.second;
-        cout << "";
-
         Cmp_Status cmpStatus = Repository::IndexCommitComp(iEtEPair.getVal1(), iEtEPair.getVal2().hash);
         if (cmpStatus == CMP_DIFFER)
         {
             stagedChangesExist = true;
-            cout << RED << "modified:" << "    " << filename << endl;
+            cout << RED << "modified:" << "    " << filename << RESETCOLOR << endl;
         }
         else if (!iEtEPair.val2Exists()) // not exist in haeda
         {
             stagedChangesExist = true;
-            cout << GREEN << "new file:" << "    " << filename << endl;
+            cout << GREEN << "new file:" << "    " << filename << RESETCOLOR << endl;
         }
         else if (!iEtEPair.val1Exists()) // not exist in index
         {
             stagedChangesExist = true;
-            cout << RED << "deleted:" << "    " << filename << endl;
+            cout << RED << "deleted:" << "    " << filename << RESETCOLOR << endl;
         }
     }
-    cout << "End" << endl;
-    setColor(0, 7);
 
     cout << "Changes not staged for commit:" << endl; // working dir - index
 
@@ -80,16 +75,12 @@ void statusCommandExe(int argc, char *argv[])
         if (cmpStatus == CMP_DIFFER)
         {
             unstagedChangesExist = true;
-            setColor(0, 5);
             cout << "modified" << " " << iE.path << endl;
-            setColor(0, 7);
         }
         else if (cmpStatus == CMP_IN_WR_NotExist_WR)
         {
             unstagedChangesExist = true;
-            setColor(0, 5);
             cout << "deleted" << " " << iE.path << endl;
-            setColor(0, 7);
         }
     }
 
