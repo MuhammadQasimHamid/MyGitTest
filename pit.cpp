@@ -56,11 +56,11 @@ int main(int argc, char *argv[])
         // cout << fileContents << endl;    done
             // initCommandExe(2, (char*[]){"", "init"});
         // addCommandExe(3, (char*[]){"", "add", "."});  
-
+        
         // char* ar[]= {"","commit","-m","test"};
         // commitCommandExe(4,ar);
-        // statusCommandExe(argc, argv);
-        checkoutCommandExe(3, (char*[]){"","checkout","acf6d5cf09178bf8c91c0d67ba018e4ab3739db2"});
+        statusCommandExe(argc, argv);
+        // checkoutCommandExe(3, (char*[]){"","checkout","456446c04ab6636209925c44d7573e54f02c1aec"});
         // cout << Repository::getBranchHash("master")  ; done
         
         cout << "Function Testing---End" << endl;

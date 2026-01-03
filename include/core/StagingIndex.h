@@ -21,6 +21,10 @@ struct indexEntry
         this->offset = offset;
         this->path = path;
     }
+    indexEntry()
+    {
+        mode = hash = offset = path = "";
+    }
 };
 
 class StagingIndex
@@ -42,15 +46,16 @@ public:
     static void load();
 
     static void save();
-
+    
     static bool addPathToIndex(const path &dirPath);
+    static bool addFileToIndex(const path &filePath);
     static bool addDirectory(const path &dirPath);
+    static int removeDeletedWRFilesFromIndex();
 
     static bool isTrackedFile(const path &filePath);
 
     static indexEntry *getEntry(const path &filePath);
 
-    static bool addFileToIndex(const path &filePath);
 };
 
 #endif

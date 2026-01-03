@@ -16,7 +16,7 @@ void logCommandExe(int argc, char *argv[])
             string rawCommitObjectContents = readFileWithStoredObjectHash(tempHash);
             CommitObject cObj(rawCommitObjectContents); // deserilize
             TreeObject tObj(readFileWithStoredObjectHash(cObj.treeHash));
-            cout << "----------------------------------" << endl;
+            cout << "------------------" << cObj.message << " " << " Hash: " << cObj.getHash() << "----------------" << endl;
             cout << cObj.serializeContent() << endl;
             cout <<  "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^" << endl;
             cout << tObj.contents << endl;

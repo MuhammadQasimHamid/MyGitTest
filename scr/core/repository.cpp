@@ -257,39 +257,82 @@ string Repository::getBranchHash(string branch)
 
 bool Repository::isInPitIgnore(fs::path pathToCheck)
 {
-
     fs::path relPath = normalize_relative(pathToCheck);
 
-    string fileContents = readFile(pitIgnoreFilePath);
-    vector<string> lines = split(fileContents, '\n');
+    // Read the ignore file once
+    std::string fileContents = readFile(pitIgnoreFilePath);
+    std::vector<std::string> lines = split(fileContents, '\n');
 
-    for (string rule : lines)
+    for (std::string rule : lines)
     {
-        if (rule.empty())
-            continue;
+        // Skip empty lines
+        if (rule.empty()) continue;
 
+        // Normalize rule
         fs::path rulePath = fs::path(rule).lexically_normal();
 
-        // 1. Exact file name match (e.g. test.exe)
-        if (relPath.filename() == rulePath)
-            return true;
-
-        // 2. Exact path match
-        if (relPath == rulePath)
-            return true;
-
-        // 3. Directory ignore (build/, .git/, etc.)
-        if (is_subpath(rulePath, relPath))
-            return true;
+        // Directory ignore (ends with '/')
+        if (rule.back() == '/')
+        {
+            // remove trailing '/' for comparison
+            rulePath = rulePath.parent_path() / rulePath.filename();
+            if (is_subpath(rulePath, relPath))
+                return true;
+        }
+        else
+        {
+            // Exact file or directory match
+            if (relPath == rulePath || relPath.filename() == rulePath.filename())
+                return true;
+        }
     }
 
     return false;
+
+
+    // fs::path relPath = normalize_relative(pathToCheck);
+
+    // string fileContents = readFile(pitIgnoreFilePath);
+    // vector<string> lines = split(fileContents, '\n');
+
+    // for (string rule : lines)
+    // {
+    //     if (rule.empty())
+    //         continue;
+
+    //     fs::path rulePath = fs::path(rule).lexically_normal();
+
+    //     // 1. Exact file name match (e.g. test.exe)
+    //     if (relPath.filename() == rulePath)
+    //         return true;
+
+    //     // 2. Exact path match
+    //     if (relPath == rulePath)
+    //         return true;
+
+    //     // 3. Directory ignore (build/, .git/, etc.)
+    //     if (is_subpath(rulePath, relPath))
+    //         return true;
+    // }
+
+    // return false;
 }
 
 // Comparisons
-FileStatus Repository::IndexWorkingDirComp(indexEntry iE, fs::path filePath)
+    // CMP_Same
+    // CMP_Differ
+    // CMP_IN_WR_NotExist_IN
+    // CMP_IN_WR_NotExist_WR
+    // CMP_IN_H_NotExist_IN
+    // CMP_IN_H_NotExist_H
+    // CMP_WR_H_NotExist_WR
+    // CMP_WR_H_NotExist_H
+
+Cmp_Status Repository::IndexWorkingDirComp(indexEntry iE, fs::path filePath)
 {
 
+    if(iE.hash == "")
+        return CMP_IN_WR_NotExist_IN;
     // .pit/objects/2c/aaef87a6ef8ae6fa87ef6a8e76fa87ef
     fs::path indexFilePath = objectsFolderPath / iE.hash.substr(0, 2) / iE.hash.substr(2);
     if (exists(filePath))
@@ -300,42 +343,67 @@ FileStatus Repository::IndexWorkingDirComp(indexEntry iE, fs::path filePath)
             BlobObject BObj(filePath.filename().string(), fileContents);
             string fileHash = BObj.getHash();
             if (fileHash != iE.hash)
-                return File_ContentsDiffer;
+                return CMP_DIFFER;
         }
-        return File_Same;
+        return CMP_SAME;
     }
     else
-        return File_NotExist;
+        return CMP_IN_WR_NotExist_WR;
 }
 
-FileStatus Repository::IndexLastCommitComp(indexEntry iE, string lastCommitFileHash)
+
+Cmp_Status Repository::IndexCommitComp(indexEntry iE, string lastCommitFileHash)
 {
+    if(iE.hash == "")
+        return CMP_IN_C_NotExist_C; 
     if (lastCommitFileHash == "")
-        return File_NotExist;
+        return CMP_IN_C_NotExist_IN;
     if (iE.hash == lastCommitFileHash)
-        return File_Same;
-    return File_ContentsDiffer;
+        return CMP_SAME;
+    return CMP_DIFFER;
 }
- FileStatus Repository::WorkingDirCommitComp(path filePath,string commitTreeFileHash)
+ Cmp_Status Repository::WorkingDirCommitComp(path filePath,string commitTreeFileHash)
 {
+    if(commitTreeFileHash == "")
+        return CMP_WR_C_NotExist_C;
     try
     {
-        
         string rawFile = readFile(filePath);
         BlobObject bObj(filePath.filename().string(),rawFile); // calling normal construction DD
         string hash = bObj.getHash();
         if(hash == commitTreeFileHash)
-            return File_Same;
+            return CMP_SAME;
         else
-            return File_ContentsDiffer;
+            return CMP_DIFFER;
     }
     catch(...)
     {
-        return File_NotExist;
+        return CMP_WR_C_NotExist_WR;
     }
-    
-    
+}
 
+// overloaded
+Cmp_Status Repository::IndexWorkingDirComp(cmpPair<indexEntry,path> pair)
+{
+
+    if(!pair.val1Exists())
+        return CMP_IN_WR_NotExist_IN;
+    // .pit/objects/2c/aaef87a6ef8ae6fa87ef6a8e76fa87ef
+    fs::path indexFilePath = objectsFolderPath /pair.getVal1().hash.substr(0, 2) / pair.getVal1().hash.substr(2);
+    if (exists(pair.getVal2()))
+    {
+        // if (file_size(filePath) != file_size(indexFilePath) || last_write_time(filePath) != last_write_time(indexFilePath))
+        {
+            string fileContents = readFile(pair.getVal2());
+            BlobObject BObj(pair.getVal2().filename().string(), fileContents);
+            string fileHash = BObj.getHash();
+            if (fileHash != pair.getVal1().hash)
+                return CMP_DIFFER;
+        }
+        return CMP_SAME;
+    }
+    else
+        return CMP_IN_WR_NotExist_WR;
 }
 
 

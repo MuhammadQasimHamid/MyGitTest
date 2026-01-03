@@ -50,11 +50,10 @@ void StagingIndex::load()
             }
         }
     }
-    catch(...)
+    catch (...)
     {
         // just ignore
     }
-    
 }
 void StagingIndex::save()
 {
@@ -70,7 +69,7 @@ bool StagingIndex::isTrackedFile(const path &filePath)
 {
     for (const auto &iE : indexEntries)
     {
-        if (iE.path == relative(absolute(filePath), Repository::project_absolute).string())// compare paths correctly
+        if (iE.path == relative(absolute(filePath), Repository::project_absolute).string()) // compare paths correctly
         {
             return true;
         }
@@ -82,7 +81,7 @@ indexEntry *StagingIndex::getEntry(const path &filePath)
 {
     for (auto &iE : indexEntries)
     {
-        if (iE.path == relative(absolute(filePath), Repository::project_absolute).string())// compare paths correctly
+        if (iE.path == relative(absolute(filePath), Repository::project_absolute).string()) // compare paths correctly
         {
             return &iE;
         }
@@ -97,6 +96,11 @@ bool StagingIndex::addPathToIndex(const path &dirPath)
     if (is_directory(relativePath))
     {
         addDirectory(relativePath);
+        if (relativePath == ".")
+        {
+            removeDeletedWRFilesFromIndex();
+            save(); // update
+        }
     }
     else if (is_regular_file(relativePath))
     {
@@ -107,6 +111,21 @@ bool StagingIndex::addPathToIndex(const path &dirPath)
         return false;
     }
     return true;
+}
+int StagingIndex::removeDeletedWRFilesFromIndex()
+{
+    int count = 0;
+    for (auto it = indexEntries.begin(); it != indexEntries.end();)
+    {
+        if (Repository::IndexWorkingDirComp(*it, it->path) == CMP_IN_WR_NotExist_WR)
+            {
+                it = indexEntries.erase(it);
+                count++;
+            }
+        else
+            ++it;
+    }
+    return count;    
 }
 bool StagingIndex::addFileToIndex(const path &filePath)
 {

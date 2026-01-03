@@ -28,23 +28,28 @@ void checkoutCommandExe(int argc, char *argv[])
                 cout << FlattenfilePath;
                 if(StagingIndex::isTrackedFile(FlattenfilePath) )
                 {   
-                    FileStatus fStatus =  Repository::WorkingDirCommitComp(FlattenfilePath,tE.hash);
-                    if(fStatus == File_ContentsDiffer || fStatus == File_NotExist)
+                    Cmp_Status cmpStatus =  Repository::WorkingDirCommitComp(FlattenfilePath,tE.hash);
+                    if(cmpStatus == CMP_DIFFER ) // if the file is diff in WR or not Exist in WR
                     {
                         cout <<  "         Contents Differ";
                         string blobRawFileContents = readFileWithStoredObjectHash(tE.hash);
                         BlobObject bObj(blobRawFileContents); // deserilized constructor called
                         writeFile(FlattenfilePath,bObj.contents); // Re-write
                     }
-                    else if(fStatus == File_NotExist)
+                    else if(cmpStatus == CMP_WR_C_NotExist_WR)
                     {
                         cout <<  "         Write file";
                         string blobRawFileContents = readFileWithStoredObjectHash(tE.hash);
                             BlobObject bObj(blobRawFileContents); // deserilized constructor called
                             writeFile(FlattenfilePath,bObj.contents); // Re-write
                     }
-                    else if(fStatus != File_Nothing) // fStatus is not above options and it is also != File_Nothing
+                    else if(cmpStatus == CMP_SAME)
                     {
+                        //do nothing
+                    }
+                    else if(cmpStatus == CMP_WR_C_NotExist_C) // so in commit, it does'nt exist so del from here
+                    {
+                        cout << "Delete file";
                         deleteFile(FlattenfilePath);
                     }
 
