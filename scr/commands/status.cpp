@@ -24,6 +24,8 @@ void statusCommandExe(int argc, char *argv[])
     string cBranchHash = Repository::getBranchHash(cBranch);
     map<path, treeEntry> flattenTree;
     cmpMap<path, indexEntry, treeEntry> cmpMapiEtE;
+    for (auto iE : StagingIndex::indexEntries)
+        cmpMapiEtE.addVal1(iE.path, iE);
     if (cBranchHash == "")
     {
     }
@@ -35,8 +37,6 @@ void statusCommandExe(int argc, char *argv[])
         TreeObject TObj(rawFileContentsTree);
         flattenTree = Repository::FlattenTreeObject(TObj);
         // key value1 value2
-        for (auto iE : StagingIndex::indexEntries)
-            cmpMapiEtE.addVal1(iE.path, iE);
         for (auto keyValuePair : flattenTree)
             cmpMapiEtE.addVal2(keyValuePair.first, keyValuePair.second);
     }

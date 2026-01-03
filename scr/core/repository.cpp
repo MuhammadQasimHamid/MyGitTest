@@ -254,6 +254,50 @@ string Repository::getBranchHash(string branch)
 //     return false;
 // }
 
+bool Repository::stagedChangesExist()
+{
+    string cBranch = currentBranch();
+    string cBranchHash = getBranchHash(cBranch);
+    map<path, treeEntry> flattenTree;
+    cmpMap<path, indexEntry, treeEntry> cmpMapiEtE;
+    // fill the flatten tree
+    for (auto iE : StagingIndex::indexEntries)
+        cmpMapiEtE.addVal1(iE.path, iE);
+    if (cBranchHash != "")
+    {
+        string rawFileContentsCommit = readFileWithStoredObjectHash(cBranchHash);
+        CommitObject CObj(rawFileContentsCommit);
+        string rawFileContentsTree = readFileWithStoredObjectHash(CObj.treeHash);
+        TreeObject TObj(rawFileContentsTree);
+        flattenTree = FlattenTreeObject(TObj);
+        // key value1 value2
+        for (auto keyValuePair : flattenTree)
+            cmpMapiEtE.addVal2(keyValuePair.first, keyValuePair.second);
+    }
+
+    // cout << "Comparing with Last Commit: " << StagingIndex::indexEntries.size() <<"" << endl;
+    for (auto cmpRow : cmpMapiEtE.umap)
+    {
+        cmpPair iEtEPair = cmpRow.second;
+        Cmp_Status cmpStatus = IndexCommitComp(iEtEPair.getVal1(), iEtEPair.getVal2().hash);
+        if (cmpStatus == CMP_DIFFER || !iEtEPair.val2Exists() || !iEtEPair.val1Exists())
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool Repository::unstagedChangesExist()
+{
+    for (auto iE : StagingIndex::indexEntries)
+    {
+        Cmp_Status cmpStatus = IndexWorkingDirComp(iE, iE.path);
+        if (cmpStatus == CMP_DIFFER || cmpStatus == CMP_IN_WR_NotExist_WR)
+            return true;
+    }
+    return false;
+}
 
 bool Repository::isInPitIgnore(fs::path pathToCheck)
 {
@@ -266,7 +310,8 @@ bool Repository::isInPitIgnore(fs::path pathToCheck)
     for (std::string rule : lines)
     {
         // Skip empty lines
-        if (rule.empty()) continue;
+        if (rule.empty())
+            continue;
 
         // Normalize rule
         fs::path rulePath = fs::path(rule).lexically_normal();
@@ -288,7 +333,6 @@ bool Repository::isInPitIgnore(fs::path pathToCheck)
     }
 
     return false;
-
 
     // fs::path relPath = normalize_relative(pathToCheck);
 
@@ -319,19 +363,19 @@ bool Repository::isInPitIgnore(fs::path pathToCheck)
 }
 
 // Comparisons
-    // CMP_Same
-    // CMP_Differ
-    // CMP_IN_WR_NotExist_IN
-    // CMP_IN_WR_NotExist_WR
-    // CMP_IN_H_NotExist_IN
-    // CMP_IN_H_NotExist_H
-    // CMP_WR_H_NotExist_WR
-    // CMP_WR_H_NotExist_H
+// CMP_Same
+// CMP_Differ
+// CMP_IN_WR_NotExist_IN
+// CMP_IN_WR_NotExist_WR
+// CMP_IN_H_NotExist_IN
+// CMP_IN_H_NotExist_H
+// CMP_WR_H_NotExist_WR
+// CMP_WR_H_NotExist_H
 
 Cmp_Status Repository::IndexWorkingDirComp(indexEntry iE, fs::path filePath)
 {
 
-    if(iE.hash == "")
+    if (iE.hash == "")
         return CMP_IN_WR_NotExist_IN;
     // .pit/objects/2c/aaef87a6ef8ae6fa87ef6a8e76fa87ef
     fs::path indexFilePath = objectsFolderPath / iE.hash.substr(0, 2) / iE.hash.substr(2);
@@ -351,45 +395,44 @@ Cmp_Status Repository::IndexWorkingDirComp(indexEntry iE, fs::path filePath)
         return CMP_IN_WR_NotExist_WR;
 }
 
-
 Cmp_Status Repository::IndexCommitComp(indexEntry iE, string lastCommitFileHash)
 {
-    if(iE.hash == "")
-        return CMP_IN_C_NotExist_C; 
+    if (iE.hash == "")
+        return CMP_IN_C_NotExist_C;
     if (lastCommitFileHash == "")
         return CMP_IN_C_NotExist_IN;
     if (iE.hash == lastCommitFileHash)
         return CMP_SAME;
     return CMP_DIFFER;
 }
- Cmp_Status Repository::WorkingDirCommitComp(path filePath,string commitTreeFileHash)
+Cmp_Status Repository::WorkingDirCommitComp(path filePath, string commitTreeFileHash)
 {
-    if(commitTreeFileHash == "")
+    if (commitTreeFileHash == "")
         return CMP_WR_C_NotExist_C;
     try
     {
         string rawFile = readFile(filePath);
-        BlobObject bObj(filePath.filename().string(),rawFile); // calling normal construction DD
+        BlobObject bObj(filePath.filename().string(), rawFile); // calling normal construction DD
         string hash = bObj.getHash();
-        if(hash == commitTreeFileHash)
+        if (hash == commitTreeFileHash)
             return CMP_SAME;
         else
             return CMP_DIFFER;
     }
-    catch(...)
+    catch (...)
     {
         return CMP_WR_C_NotExist_WR;
     }
 }
 
 // overloaded
-Cmp_Status Repository::IndexWorkingDirComp(cmpPair<indexEntry,path> pair)
+Cmp_Status Repository::IndexWorkingDirComp(cmpPair<indexEntry, path> pair)
 {
 
-    if(!pair.val1Exists())
+    if (!pair.val1Exists())
         return CMP_IN_WR_NotExist_IN;
     // .pit/objects/2c/aaef87a6ef8ae6fa87ef6a8e76fa87ef
-    fs::path indexFilePath = objectsFolderPath /pair.getVal1().hash.substr(0, 2) / pair.getVal1().hash.substr(2);
+    fs::path indexFilePath = objectsFolderPath / pair.getVal1().hash.substr(0, 2) / pair.getVal1().hash.substr(2);
     if (exists(pair.getVal2()))
     {
         // if (file_size(filePath) != file_size(indexFilePath) || last_write_time(filePath) != last_write_time(indexFilePath))
@@ -405,8 +448,6 @@ Cmp_Status Repository::IndexWorkingDirComp(cmpPair<indexEntry,path> pair)
     else
         return CMP_IN_WR_NotExist_WR;
 }
-
-
 
 map<path, treeEntry> Repository::FlattenTreeObject(TreeObject TObj, path prefix)
 {

@@ -34,7 +34,6 @@ enum Cmp_Status
     CMP_WR_C_NotExist_C,
 };
 
-
 FileStatus sToFileStatus(string str);
 string fileStatusToS(FileStatus fileStatus);
 
@@ -71,16 +70,17 @@ public:
     static string StoreTreeRec(TreeNode *node);
 
     static bool isInPitIgnore(fs::path pathtoCheck);
+    static bool stagedChangesExist();
+    static bool unstagedChangesExist();
 
     // comparisions
     static Cmp_Status IndexWorkingDirComp(indexEntry iE, fs::path filePath);
-    Cmp_Status IndexWorkingDirComp(cmpPair<indexEntry,path> pair);
-    
+    Cmp_Status IndexWorkingDirComp(cmpPair<indexEntry, path> pair);
+
     static Cmp_Status IndexCommitComp(indexEntry iE, string lastCommitFileHash);
 
-    static Cmp_Status WorkingDirCommitComp(path filePath,string commitHash);
-    static map<path,treeEntry> FlattenTreeObject(TreeObject TObj, path prefix = path());
-    
+    static Cmp_Status WorkingDirCommitComp(path filePath, string commitHash);
+    static map<path, treeEntry> FlattenTreeObject(TreeObject TObj, path prefix = path());
 };
 
 #endif
