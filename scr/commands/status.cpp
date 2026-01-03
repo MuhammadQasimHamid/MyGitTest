@@ -17,9 +17,9 @@ void statusCommandExe(int argc, char *argv[])
 {
     bool stagedChangesExist = false, unstagedChangesExist = false;
     cout << "On Branch " << Repository::currentBranch() << endl;
-
+    cout << endl;
     cout << "Changes to be committed:" << endl; // index - last commit
-    cout << "  (use 'git restore --staged <file>...' to unstage)";
+    cout << "  (use 'git restore --staged <file>...' to unstage)" << endl;
     string cBranch = Repository::currentBranch();
     string cBranchHash = Repository::getBranchHash(cBranch);
     map<path, treeEntry> flattenTree;
@@ -51,22 +51,21 @@ void statusCommandExe(int argc, char *argv[])
         if (cmpStatus == CMP_DIFFER)
         {
             stagedChangesExist = true;
-            cout << RED << "modified:" << "    " << filename << RESETCOLOR << endl;
+            cout << GREEN << "\tmodified:" << "    " << filename << RESETCOLOR << endl;
         }
         else if (!iEtEPair.val2Exists()) // not exist in haeda
         {
             stagedChangesExist = true;
-            cout << GREEN << "new file:" << "    " << filename << RESETCOLOR << endl;
+            cout << GREEN << "\tnew file:" << "    " << filename << RESETCOLOR << endl;
         }
         else if (!iEtEPair.val1Exists()) // not exist in index
         {
             stagedChangesExist = true;
-            cout << RED << "deleted:" << "    " << filename << RESETCOLOR << endl;
+            cout << GREEN << "\tdeleted:" << "    " << filename << RESETCOLOR << endl;
         }
     }
 
     cout << "Changes not staged for commit:" << endl; // working dir - index
-
     for (auto iE : StagingIndex::indexEntries)
     {
         cout << "";
@@ -75,24 +74,26 @@ void statusCommandExe(int argc, char *argv[])
         if (cmpStatus == CMP_DIFFER)
         {
             unstagedChangesExist = true;
-            cout << "modified" << " " << iE.path << endl;
+            cout << RED << "\tmodified" << " " << iE.path << RESETCOLOR << endl;
         }
         else if (cmpStatus == CMP_IN_WR_NotExist_WR)
         {
             unstagedChangesExist = true;
-            cout << "deleted" << " " << iE.path << endl;
+            cout << RED << "\tdeleted" << " " << iE.path << RESETCOLOR << endl;
         }
     }
 
-    cout << "End" << endl;
     if (!stagedChangesExist && !unstagedChangesExist)
     {
         cout << "Working Area Clean, nothing to commit" << endl;
     }
+
+    cout << "Untracked files:" << endl;
+    cout << "(use \" git add<file>... \" to include in what will be committed)" << endl;
     traverseDirectory(".", [](const fs::path &relPath)
                       {
             if(!StagingIndex::isTrackedFile(relPath))
-                std::cout << "Untracked: " << relPath.generic_string() << std::endl; });
+                std::cout <<RED <<"\tUntracked: " << relPath.generic_string() << RESETCOLOR << std::endl; });
 }
 
 // fs::path relPath;
