@@ -17,12 +17,13 @@ void initCommandExe(int argc, char *argv[]);
 void addCommandExe(int argc, char *argv[]);
 void helpCommandExe(int argc, char *argv[]);
 void commitCommandExe(int argc, char *argv[]);
-void statusCommandExe(int argc, char *argv[]); 
-void checkoutCommandExe(int argc, char *argv[]); 
+void statusCommandExe(int argc, char *argv[]);
+void checkoutCommandExe(int argc, char *argv[]);
+void logCommandExe(int argc, char *argv[]);
 map<string, cmdFunc> cmdCodes;
 
 void callFunc(int argc, char *argv[]);
-bool pitRepoExists(); 
+bool pitRepoExists();
 void loadConfiguraion()
 {
     cmdCodes["init"] = initCommandExe;
@@ -31,6 +32,7 @@ void loadConfiguraion()
     cmdCodes["commit"] = commitCommandExe;
     cmdCodes["status"] = statusCommandExe;
     cmdCodes["checkout"] = checkoutCommandExe;
+    cmdCodes["log"] = logCommandExe;
 }
 int main(int argc, char *argv[])
 {
@@ -51,21 +53,21 @@ void callFunc(int argc, char *argv[])
         cout << "Invalid Command" << endl;
         return;
     }
-    if(pitRepoExists() || cmdStr == "init")
+    if (pitRepoExists() || cmdStr == "init")
     {
         Repository::InitializeClass();
         cmdCodes[cmdStr](argc, argv);
     }
     else
-    {   
-        cout << "Pit repo not exists in this directory..." <<endl;
+    {
+        cout << "Pit repo not exists in this directory..." << endl;
         cout << "(Type: 'pit init' to initialize pit repo)." << endl;
     }
 }
 
 bool pitRepoExists()
 {
-    if(exists(".pit"))
+    if (exists(".pit"))
     {
         return true;
     }
