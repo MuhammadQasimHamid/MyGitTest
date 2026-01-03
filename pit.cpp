@@ -19,11 +19,12 @@ void helpCommandExe(int argc, char *argv[]);
 void commitCommandExe(int argc, char *argv[]);
 void statusCommandExe(int argc, char *argv[]);
 void checkoutCommandExe(int argc, char *argv[]);
-void logCommandExe(int argc, char *argv[]);
+void catfileCommandExe(int argc, char *argv[]);
 map<string, cmdFunc> cmdCodes;
 
 void callFunc(int argc, char *argv[]);
 bool pitRepoExists();
+void printArgs(int argc, char *argv[]);
 void loadConfiguraion()
 {
     cmdCodes["init"] = initCommandExe;
@@ -32,10 +33,11 @@ void loadConfiguraion()
     cmdCodes["commit"] = commitCommandExe;
     cmdCodes["status"] = statusCommandExe;
     cmdCodes["checkout"] = checkoutCommandExe;
-    cmdCodes["log"] = logCommandExe;
+    cmdCodes["cat-file"] = catfileCommandExe;
 }
 int main(int argc, char *argv[])
 {
+    printArgs(argc, argv);
     loadConfiguraion();
     cout << "Pit Refreshed" << endl;
     if (argc > 1)
@@ -47,6 +49,7 @@ int main(int argc, char *argv[])
 
 void callFunc(int argc, char *argv[])
 {
+
     string cmdStr = argv[1];
     if (cmdCodes.find(cmdStr) == cmdCodes.end())
     {
@@ -72,4 +75,15 @@ bool pitRepoExists()
         return true;
     }
     return false;
+}
+
+void printArgs(int argc, char *argv[])
+{
+    cout << "Arg Count: " << argc << endl;
+    cout << "Arg Values: ";
+    for (int i = 0; i < argc; i++)
+    {
+        cout << argv[i] << " ";
+    }
+    cout << endl;
 }

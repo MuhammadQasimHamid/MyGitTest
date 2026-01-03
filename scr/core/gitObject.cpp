@@ -31,7 +31,7 @@ string GitObjectTypetos(GitObjectType gObj)
         return "blob";
     if (gObj == Tag)
         return "tag";
-    return "";
+    return "Nothing";
 }
 
 #pragma region GitObject
@@ -46,11 +46,14 @@ GitObject::GitObject(GitObjectType objType, string contents)
 GitObject::GitObject(string serializedObject) // deserialize object
 {
     string header = serializedObject.substr(0, serializedObject.find('\0'));
-    string contents = serializedObject.substr(serializedObject.find('\0') + 1);
+    this->contents = serializedObject.substr(serializedObject.find('\0') + 1);
 
     vector<string> parts = split(header, '\n');
     objectType = stoGitObjectType(parts[0]);
+
+
 }
+
 // GitObject Funcitions Implementation
 string GitObject::getHash()
 {
