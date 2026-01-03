@@ -229,6 +229,29 @@ string Repository::getBranchHash(string branch)
     path branchFile = refsHeadFolderPath / branch;
     return readFile(branchFile);
 }
+vector<string> &Repository::getAllBranches()
+{
+    vector<string> res;
+    for (const auto &entry : fs::directory_iterator(Repository::refsHeadFolderPath))
+    {
+        res.push_back(entry.path().filename().string());
+    }
+    return res;
+}
+void Repository::setHEAD(string branchOrHash)
+{
+    if(branchOrHash.length() == 40 && storedObjectExistsWithHash(branchOrHash))
+        writeFile(HEADFilePath,"hash: " + branchOrHash);    
+    else
+        writeFile(HEADFilePath, "ref: refs/heads/" + branchOrHash);
+}
+string Repository::getHEAD()
+{
+    string line = readFile(HEADFilePath);
+    vector<string> parts = split(line, ' ');
+    if(parts.size() < 2)
+        return "";
+    return parts[1];
 
 // bool Repository::isInPitIgnore(fs::path pathtoCheck)
 // {

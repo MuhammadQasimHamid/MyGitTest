@@ -5,6 +5,8 @@
 #include "commands/add.h"
 #include "commands/commit.h"
 #include "commands/status.h"
+#include "commands/branch.h"
+#include "commands/merge.h"
 #include "core/repository.h"
 #include "core/StagingIndex.h"
 
@@ -36,6 +38,8 @@ void loadConfiguraion()
     cmdCodes["checkout"] = checkoutCommandExe;
     cmdCodes["cat-file"] = catfileCommandExe;
     cmdCodes["log"] = logCommandExe;
+    cmdCodes["branch"] = branchCommandExe;
+    cmdCodes["merge"] = mergeCommandExe;
     // if(pitRepoExists())
         // Repository::InitializeClass();
 }
