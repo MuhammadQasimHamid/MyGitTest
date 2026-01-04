@@ -3,6 +3,7 @@
 #include <filesystem>
 #include <algorithm>
 #include <map>
+#include "utils/mytime.h"
 #include "core/repository.h"
 #include "core/gitObject.h"
 #include "core/StagingIndex.h"
@@ -144,7 +145,7 @@ void Repository::generateCommit(string msg)
     }
     vector<string> parentHashs; // Parent Hashes
     parentHashs.push_back(BranchPointToHashOrNothing(currentBranch()));
-    CommitObject CObj(treeHash, parentHashs, "Umar", msg, "2026-01-05T18:00:00Z");
+    CommitObject CObj(treeHash, parentHashs, "Umar", msg, epochToString(getEpochSeconds()));
     storeObject(CObj);
     // StagingIndex::indexEntries.clear();
     // StagingIndex::save();
