@@ -16,7 +16,8 @@ namespace json
     void endObject(bool comma = false);
     void beginArray();
     void endArray(bool comma = false);
-
+    void beginNamedObject(const std::string &key);
+    void endNamedObject(bool comma = false);
 }
 
 #endif

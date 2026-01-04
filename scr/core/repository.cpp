@@ -142,7 +142,7 @@ void Repository::generateCommit(string msg)
     }
     vector<string> parentHashs; // Parent Hashes
     parentHashs.push_back(BranchPointToHashOrNothing(currentBranch()));
-    CommitObject CObj(treeHash, parentHashs, "Umar", msg, "12/12/12");
+    CommitObject CObj(treeHash, parentHashs, "Umar", msg, "2026-01-05T18:00:00Z");
     storeObject(CObj);
     // StagingIndex::indexEntries.clear();
     // StagingIndex::save();
@@ -250,7 +250,7 @@ pair<string, string> Repository::getHEAD()
     string line = readFile(HEADFilePath);
     vector<string> parts = split(line, ' ');
     if (parts.size() < 2)
-        return make_pair("", "")  ;
+        return make_pair("", "");
     return make_pair(parts[0], parts[1]);
 }
 
