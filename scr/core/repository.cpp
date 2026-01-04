@@ -6,6 +6,7 @@
 #include "core/repository.h"
 #include "core/gitObject.h"
 #include "core/StagingIndex.h"
+#include "core/UserConfig.h"
 #include "utils/fileCRUD.h"
 #include "dataStructure/Ntree.h"
 #include "utils/myparser.h"
@@ -56,6 +57,7 @@ void Repository::InitializeClass()
     indexFilePath = pitFolderPath / "index";
     pitIgnoreFilePath = project_absolute / ".pitignore";
     StagingIndex::InitializeClass(Repository::indexFilePath);
+    UserConfig::InitializeClass();
 }
 bool Repository::initRepo() // returns true if repo initialized successfully
 {

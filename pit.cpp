@@ -7,6 +7,7 @@
 #include "commands/status.h"
 #include "commands/branch.h"
 #include "commands/merge.h"
+#include "commands/config.h"
 #include "core/repository.h"
 #include "core/StagingIndex.h"
 
@@ -23,6 +24,7 @@ void statusCommandExe(int argc, char *argv[]);
 void checkoutCommandExe(int argc, char *argv[]);
 void catfileCommandExe(int argc, char *argv[]);
 void logCommandExe(int argc, char *argv[]);
+void configCommandExe(int argc, char *argv[]);
 map<string, cmdFunc> cmdCodes;
 
 void callFunc(int argc, char *argv[]);
@@ -40,6 +42,8 @@ void loadConfiguraion()
     cmdCodes["log"] = logCommandExe;
     cmdCodes["branch"] = branchCommandExe;
     cmdCodes["merge"] = mergeCommandExe;
+    cmdCodes["config"] = configCommandExe;
+
     // if(pitRepoExists())
     // Repository::InitializeClass();
 }
