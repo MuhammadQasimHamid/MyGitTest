@@ -63,4 +63,17 @@ namespace json
         cout << "\n";
     }
 
+    void beginNamedObject(const string &key)
+    {
+        cout << "  \"" << key << "\": {\n";
+    }
+
+    void endNamedObject(bool comma)
+    {
+        cout << "  }";
+        if (comma)
+            cout << ",";
+        cout << "\n";
+    }
+
 }
