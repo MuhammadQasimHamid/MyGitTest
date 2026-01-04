@@ -70,7 +70,7 @@ public:
     static vector<string> getAllBranches();
     static void setHEAD(string branch);
     static string getHEAD();
-    
+
     static string StoreTreeRec(TreeNode *node);
 
     static bool isInPitIgnore(fs::path pathtoCheck);

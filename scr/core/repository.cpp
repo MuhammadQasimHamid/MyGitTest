@@ -240,8 +240,8 @@ vector<string> Repository::getAllBranches()
 }
 void Repository::setHEAD(string branchOrHash)
 {
-    if(branchOrHash.length() == 40 && storedObjectExistsWithHash(branchOrHash))
-        writeFile(HEADFilePath,"hash: " + branchOrHash);    
+    if (branchOrHash.length() == 40 && storedObjectExistsWithHash(branchOrHash))
+        writeFile(HEADFilePath, "hash: " + branchOrHash);
     else
         writeFile(HEADFilePath, "ref: refs/heads/" + branchOrHash);
 }
@@ -249,10 +249,10 @@ string Repository::getHEAD()
 {
     string line = readFile(HEADFilePath);
     vector<string> parts = split(line, ' ');
-    if(parts.size() < 2)
+    if (parts.size() < 2)
         return "";
     return parts[1];
-}
+
 // bool Repository::isInPitIgnore(fs::path pathtoCheck)
 // {
 //     string fileContents = readFile(pitIgnoreFilePath);
