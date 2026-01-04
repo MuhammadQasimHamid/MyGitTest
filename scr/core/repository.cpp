@@ -205,17 +205,16 @@ string Repository::StoreTreeRec(TreeNode *node)
 
 string Repository::currentBranch()
 {
-    pair<string, string> headInfo = getHEAD();
-    if(headInfo.first == "hash")
-        return "DETACHED HEAD";
-    path refPath = headInfo.second;
+    string line = readFile(HEADFilePath);
+    vector<string> parts = split(line, ' ');
+    path refPath = parts[1];
     if (refPath == "")
-        return "DETACHED HEAD"; //  not sure
+        return "DETACHED HEAD";
     return refPath.filename().string();
 }
 string Repository::BranchPointToHashOrNothing(string branch)
 {
-    string branchHashOrNothing = readFile(".pit/refs/heads/" + branch);
+    string branchHashOrNothing = readFile(".pit/refs/heads/master");
     cout << "main:" << branchHashOrNothing << endl;
     return branchHashOrNothing;
 }
@@ -223,7 +222,7 @@ void Repository::UpdateBranchHash(string branch, string hash)
 {
     path branchFile = refsHeadFolderPath / branch;
     cout << "Branch Update: " << (branchFile.string()) << " hash: " << hash;
-    writeFile(".pit/refs/heads/" + branch, hash); // change it letter (we will not hardcode)
+    writeFile(".pit/refs/heads/master", hash); // change it letter (we will not hardcode)
 }
 string Repository::getBranchHash(string branch)
 {
@@ -251,9 +250,10 @@ pair<string, string> Repository::getHEAD()
     string line = readFile(HEADFilePath);
     vector<string> parts = split(line, ' ');
     if (parts.size() < 2)
-        return {"", ""};
-    return {parts[0],parts[1]};
+        return make_pair("", "")  ;
+    return make_pair(parts[0], parts[1]);
 }
+
 // bool Repository::isInPitIgnore(fs::path pathtoCheck)
 // {
 //     string fileContents = readFile(pitIgnoreFilePath);

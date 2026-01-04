@@ -69,7 +69,7 @@ public:
     static string getBranchHash(string branch);
     static vector<string> getAllBranches();
     static void setHEAD(string branch);
-    static pair<string, string> getHEAD();
+    static pair<string,string> getHEAD();
 
     static string StoreTreeRec(TreeNode *node);
 

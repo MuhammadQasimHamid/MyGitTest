@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
         // commitCommandExe(4,ar);
         // statusCommandExe(argc, argv);
         // branchCommandExe(2,(char*[]){"","branch"});
-        logCommandExe(2,(char*[]){"","log"});
+        logCommandExe(3,(char*[]){"","log","--all"});
         // checkoutCommandExe(3, (char*[]){"","checkout","456446c04ab6636209925c44d7573e54f02c1aec"});
         // cout << Repository::getBranchHash("master")  ; done
 
