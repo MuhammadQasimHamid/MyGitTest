@@ -252,7 +252,7 @@ string Repository::getHEAD()
     if (parts.size() < 2)
         return "";
     return parts[1];
-
+}
 // bool Repository::isInPitIgnore(fs::path pathtoCheck)
 // {
 //     string fileContents = readFile(pitIgnoreFilePath);
