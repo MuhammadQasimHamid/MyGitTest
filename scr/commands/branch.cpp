@@ -3,10 +3,22 @@
 #include "core/repository.h"
 #include "core/StagingIndex.h"
 #include "utils/colors.h"
+#include "utils/json_helper.h"
 using namespace std;
 
 void branchCommandExe(int argc, char *argv[])
 {
+    bool jsonMode = false;
+    for (int i = 1; i < argc; ++i)
+        if (string(argv[i]) == "--json")
+            jsonMode = true;
+    if (jsonMode)
+    {
+        vector<string> allBranches = Repository::getAllBranches();
+        string cBranch = Repository::currentBranch();
+        branchJSON(allBranches, cBranch);
+        return;
+    }
     if (argc == 2)
     {
         vector<string> allBranches = Repository::getAllBranches();
@@ -44,4 +56,15 @@ void branchCommandExe(int argc, char *argv[])
     {
         cout << "Invalid Params" << endl;
     }
+}
+
+void branchJSON(
+    const std::vector<std::string> &branches, const std::string currentBranch)
+{
+    using namespace json;
+
+    beginObject();
+    printArray("branches", branches);
+    printString("current_branch", currentBranch, false);
+    endObject();
 }
