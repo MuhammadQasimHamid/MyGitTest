@@ -67,7 +67,7 @@ public:
     static string BranchPointToHashOrNothing(string branch);
     static void UpdateBranchHash(string branch, string hash);
     static string getBranchHash(string branch);
-    static vector<string>& getAllBranches();
+    static vector<string> getAllBranches();
     static void setHEAD(string branch);
     static string getHEAD();
     

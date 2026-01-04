@@ -229,7 +229,7 @@ string Repository::getBranchHash(string branch)
     path branchFile = refsHeadFolderPath / branch;
     return readFile(branchFile);
 }
-vector<string> &Repository::getAllBranches()
+vector<string> Repository::getAllBranches()
 {
     vector<string> res;
     for (const auto &entry : fs::directory_iterator(Repository::refsHeadFolderPath))
@@ -252,7 +252,7 @@ string Repository::getHEAD()
     if(parts.size() < 2)
         return "";
     return parts[1];
-
+}
 // bool Repository::isInPitIgnore(fs::path pathtoCheck)
 // {
 //     string fileContents = readFile(pitIgnoreFilePath);

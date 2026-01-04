@@ -2,15 +2,28 @@
 #include <iostream>
 #include "core/repository.h"
 #include "core/StagingIndex.h"
+#include "utils/colors.h"
 using namespace std;
 
 void branchCommandExe(int argc, char *argv[])
 {
-    if (argc == 3)
+    if (argc == 2)
+    {
+        vector<string> allBranches = Repository::getAllBranches();
+        string cBranch = Repository::currentBranch();
+        for (auto br : allBranches)
+        {
+            if (br == cBranch)
+                cout << "* " << GREEN << br << RESETCOLOR << endl;
+            else
+                cout << "  " << br << endl;
+        }
+    }
+    else if (argc == 3)
     {
         string newBranchName = argv[2];
         // path newBranchPath = path(".pit/refs/heads/" + newBranchName);
-        fs::path newbranchPath = Repository::refsHeadFolderPath/newBranchName;
+        fs::path newbranchPath = Repository::refsHeadFolderPath / newBranchName;
         cout << newbranchPath << endl;
         if (!exists(newbranchPath))
         {
