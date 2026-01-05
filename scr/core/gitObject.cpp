@@ -47,14 +47,15 @@ GitObject::GitObject(GitObjectType objType, string contents)
 
 GitObject::GitObject(string serializedObject) // deserialize object
 {
-    try{
+    try
+    {
         string header = serializedObject.substr(0, serializedObject.find('\0'));
         this->contents = serializedObject.substr(serializedObject.find('\0') + 1);
-    
+
         vector<string> parts = split(header, ' ');
         objectType = stoGitObjectType(parts[0]);
     }
-    catch(...)
+    catch (...)
     {
         cout << "Error in GitObject deserialization" << endl;
         cout << "Serialized Object: " << serializedObject << endl;
@@ -141,7 +142,7 @@ string CommitObject::serializeContent()
     res += "tree " + this->treeHash + "\n";
     for (auto hs : parentHash)
         res += "parent " + hs + "\n";
-    res += "author " + this->author + " " + this->timeStamp + " +0000" + "\n";
+    res += "author " + this->author + " " + this->timeStamp + "\n";
     res += "\n";
     res += message + "\n";
     return res;

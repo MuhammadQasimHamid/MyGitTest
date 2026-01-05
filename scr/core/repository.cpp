@@ -49,8 +49,8 @@ fs::path Repository::pitIgnoreFilePath;
 
 void Repository::InitializeClass()
 {
-    // project_absolute = absolute(".");
-    project_absolute = "D:/3rd Sems/DSA/DSAL/VersioningTestUsingPit";
+    project_absolute = absolute(".");
+    // project_absolute = "D:/3rd Sems/DSA/DSAL/VersioningTestUsingPit";
     pitFolderPath = project_absolute / ".pit";
     objectsFolderPath = pitFolderPath / "objects";
     refsFolderPath = pitFolderPath / "refs";
@@ -91,7 +91,7 @@ bool Repository::initRepo() // returns true if repo initialized successfully
             // indexFile.close();
             writeFile(indexFilePath);
 
-           UserConfig::InitLocalConfigFile();
+            UserConfig::InitLocalConfigFile();
         }
         else
         {
@@ -221,7 +221,7 @@ string Repository::currentBranch()
 }
 string Repository::BranchPointToHashOrNothing(string branch)
 {
-    string branchHashOrNothing = readFile(".pit/refs/heads/"+branch);
+    string branchHashOrNothing = readFile(".pit/refs/heads/" + branch);
     cout << "main:" << branchHashOrNothing << endl;
     return branchHashOrNothing;
 }
@@ -229,7 +229,7 @@ void Repository::UpdateBranchHash(string branch, string hash)
 {
     path branchFile = refsHeadFolderPath / branch;
     cout << "Branch Update: " << (branchFile.string()) << " hash: " << hash;
-    writeFile(".pit/refs/heads/"+branch, hash); // change it letter (we will not hardcode)
+    writeFile(".pit/refs/heads/" + branch, hash); // change it letter (we will not hardcode)
 }
 string Repository::getBranchHash(string branch)
 {

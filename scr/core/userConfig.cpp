@@ -11,7 +11,7 @@ void UserConfig::InitializeClass()
     globalconfigFilePath = std::filesystem::path("C:/Users/Public/pitconfig");
     if (!exists(globalconfigFilePath))
     {
-        string fileContents = "name =example\nemail =example@gmail.com \n";
+        string fileContents = "name =example\nemail =example@gmail.com\n";
         writeFile(globalconfigFilePath, fileContents);
     }
 }
@@ -118,10 +118,10 @@ std::string UserConfig::getGlobalEmail()
 std::string UserConfig::getName()
 {
     string localName = getLocalName();
-    return localName == "" ? getGlobalName() : localName ;
+    return localName == "" ? getGlobalName() : localName;
 }
 std::string UserConfig::getEmail()
 {
     string localEmail = getLocalEmail();
-    return localEmail== "" ?  getGlobalEmail():localEmail;
+    return localEmail == "" ? getGlobalEmail() : localEmail;
 }
