@@ -221,7 +221,7 @@ string Repository::currentBranch()
 }
 string Repository::BranchPointToHashOrNothing(string branch)
 {
-    string branchHashOrNothing = readFile(Repository::+branch);
+    string branchHashOrNothing = readFile(Repository::refsHeadFolderPath/branch);
     cout << "main:" << branchHashOrNothing << endl;
     return branchHashOrNothing;
 }
@@ -229,7 +229,7 @@ void Repository::UpdateBranchHash(string branch, string hash)
 {
     path branchFile = refsHeadFolderPath / branch;
     cout << "Branch Update: " << (branchFile.string()) << " hash: " << hash;
-    writeFile(".pit/refs/heads/"+branch, hash); // change it letter (we will not hardcode)
+    writeFile(Repository::refsHeadFolderPath/branch, hash); // change it letter (we will not hardcode)
 }
 string Repository::getBranchHash(string branch)
 {
