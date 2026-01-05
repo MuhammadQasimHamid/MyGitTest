@@ -49,7 +49,8 @@ fs::path Repository::pitIgnoreFilePath;
 
 void Repository::InitializeClass()
 {
-    project_absolute = absolute(".");
+    // project_absolute = absolute(".");
+    project_absolute = "D:/3rd Sems/DSA/DSAL/VersioningTestUsingPit";
     pitFolderPath = project_absolute / ".pit";
     objectsFolderPath = pitFolderPath / "objects";
     refsFolderPath = pitFolderPath / "refs";
@@ -89,6 +90,8 @@ bool Repository::initRepo() // returns true if repo initialized successfully
             // ofstream indexFile(indexFilePath);
             // indexFile.close();
             writeFile(indexFilePath);
+
+           UserConfig::InitLocalConfigFile();
         }
         else
         {
@@ -145,7 +148,8 @@ void Repository::generateCommit(string msg)
     }
     vector<string> parentHashs; // Parent Hashes
     parentHashs.push_back(BranchPointToHashOrNothing(currentBranch()));
-    CommitObject CObj(treeHash, parentHashs, "Umar", msg, epochToString(getEpochSeconds()));
+    string author = UserConfig::getName() + " <" + UserConfig::getEmail() + ">";
+    CommitObject CObj(treeHash, parentHashs, author, msg, epochToString(getEpochSeconds()));
     storeObject(CObj);
     // StagingIndex::indexEntries.clear();
     // StagingIndex::save();
@@ -217,7 +221,7 @@ string Repository::currentBranch()
 }
 string Repository::BranchPointToHashOrNothing(string branch)
 {
-    string branchHashOrNothing = readFile(".pit/refs/heads/master");
+    string branchHashOrNothing = readFile(".pit/refs/heads/"+branch);
     cout << "main:" << branchHashOrNothing << endl;
     return branchHashOrNothing;
 }
@@ -225,7 +229,7 @@ void Repository::UpdateBranchHash(string branch, string hash)
 {
     path branchFile = refsHeadFolderPath / branch;
     cout << "Branch Update: " << (branchFile.string()) << " hash: " << hash;
-    writeFile(".pit/refs/heads/master", hash); // change it letter (we will not hardcode)
+    writeFile(".pit/refs/heads/"+branch, hash); // change it letter (we will not hardcode)
 }
 string Repository::getBranchHash(string branch)
 {

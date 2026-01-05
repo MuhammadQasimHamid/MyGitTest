@@ -3,34 +3,38 @@
 #include "core/repository.h"
 #include "core/StagingIndex.h"
 #include "utils/fileCRUD.h"
+#include "dataStructure/cmpMap.h"
+#include "dataStructure/Ntree.h"
 #include <iostream>
 using namespace std;
 
 void checkoutCommandExe(int argc, char *argv[])
+// pit checkout 67efef23fef23ef2f3ef23fe23e32f4
 {
-    // pit checkout 67efef23fef23ef2f3ef23fe23e32f4
+
     if (argc == 3)
     {
-        string inputHash = argv[3 - 1];
-        // compare working-head
+        if ((!Repository::stagedChangesExist() || !Repository::unstagedChangesExist()))
+        {
+            string inputHashOrBr = argv[3 - 1];
+            // compare working-head
+            vector<string> allBranches = Repository::getAllBranches();
+            bool isaBranch = false;
+            for (auto br : allBranches)
+                if (inputHashOrBr == br)
+                    isaBranch = true;
+            string inputHash = inputHashOrBr;
+            if (!storedObjectExistsWithHash(inputHashOrBr) && isaBranch)
+            {
+                string cHash = Repository::BranchPointToHashOrNothing(inputHashOrBr); // pass branch to get hash
+                if (cHash != "")
+                {
+                    inputHash = cHash;
+                    Repository::setHEAD(inputHashOrBr);
+                }
+            }
 
-        if(!storedObjectExistsWithHash(inputHash))
-        {
-            // checkout branch
-            // pit checkout dev
-            if(exists(Repository::refsHeadFolderPath/inputHash))
-            {
-                Repository::setHEAD(inputHash); // Detach head not handled
-            }
-            else
-            {
-                cout << "error: pathspec '" << inputHash << "' did not match any file(s) known to pit." << endl;
-                return;
-            }
-        }
-        else
-        {
-            if (Repository::stagedChangesExist() || Repository::unstagedChangesExist())
+            if (storedObjectExistsWithHash(inputHash))
             {
 
                 string rawFileContents = readFileWithStoredObjectHash(inputHash);
@@ -41,52 +45,79 @@ void checkoutCommandExe(int argc, char *argv[])
                     string treeRawFileContents = readFileWithStoredObjectHash(cObj.treeHash);
                     TreeObject tObj(treeRawFileContents);
                     map<path, treeEntry> flattenTree = Repository::FlattenTreeObject(tObj);
-                    for (auto it : flattenTree)
+                    cmpMap<path, treeEntry, path> cmptEPa;
+
+                    for (auto it : flattenTree) // tree enrty fill
                     {
-                        path FlattenfilePath = it.first;
                         treeEntry tE = it.second;
-                        cout << FlattenfilePath;
-                        if (StagingIndex::isTrackedFile(FlattenfilePath))
+                        cmptEPa.addVal1(it.first, tE);
+                    }
+                    // StagingIndex::save();
+                    traverseDirectory(".", [&](const fs::path &relPath)
+                                      { cmptEPa.addVal2(relPath, relPath); });
+
+
+                    for (auto it : cmptEPa.umap)
+                    {
+
+                        path filePath = it.first;
+                        treeEntry tE = it.second.getVal1();
+                        cout << filePath;
+
+                        if (StagingIndex::isTrackedFile(filePath)) //
                         {
-                            Cmp_Status cmpStatus = Repository::WorkingDirCommitComp(FlattenfilePath, tE.hash);
+                            if (!it.second.val2Exists()) // not exist in WR , but exist in commit
+                            {
+                                cout << "         Write file" << endl;
+                                string blobRawFileContents = readFileWithStoredObjectHash(tE.hash);
+                                BlobObject bObj(blobRawFileContents); // deserilized constructor called
+                                writeFile(filePath, bObj.contents);   // Re-write
+                            }
+                            else if (!it.second.val1Exists()) // so in commit, it does'nt exist so del from here
+                            {
+                                cout << "Delete file" << endl;
+                                deleteFile(filePath);
+                            }
+                            Cmp_Status cmpStatus = Repository::WorkingDirCommitComp(filePath, tE.hash);
                             if (cmpStatus == CMP_DIFFER) // if the file is diff in WR or not Exist in WR
                             {
-                                cout << "         Contents Differ";
+                                cout << "         Contents Differ" << endl;
                                 string blobRawFileContents = readFileWithStoredObjectHash(tE.hash);
-                                BlobObject bObj(blobRawFileContents);      // deserilized constructor called
-                                writeFile(FlattenfilePath, bObj.contents); // Re-write
-                            }
-                            else if (cmpStatus == CMP_WR_C_NotExist_WR)
-                            {
-                                cout << "         Write file";
-                                string blobRawFileContents = readFileWithStoredObjectHash(tE.hash);
-                                BlobObject bObj(blobRawFileContents);      // deserilized constructor called
-                                writeFile(FlattenfilePath, bObj.contents); // Re-write
+                                BlobObject bObj(blobRawFileContents); // deserilized constructor called
+                                writeFile(filePath, bObj.contents);   // Re-write
                             }
                             else if (cmpStatus == CMP_SAME)
                             {
+                                
                                 // do nothing
-                            }
-                            else if (cmpStatus == CMP_WR_C_NotExist_C) // so in commit, it does'nt exist so del from here
-                            {
-                                cout << "Delete file";
-                                deleteFile(FlattenfilePath);
                             }
                         }
                     }
+
+                    // Updating Index
+                    StagingIndex::indexEntries.clear(); // we have to update index also
+                    StagingIndex::save();
+                    for (auto it : flattenTree)
+                    {
+                        treeEntry tE = it.second;
+                        indexEntry iE(tE.mode, tE.hash, "0", it.first.string());
+                        StagingIndex::addEntry(iE);
+                    }
+                    StagingIndex::save();
                 }
                 else
                 {
                     cout << "Hash doesn't represent a commit to checkout." << endl;
                 }
             }
-            else
-            {
-                cout << "error:Your local changes to the following files would be overwritten by checkout :" << endl;
-                cout << "(use \" git status \" to check these local changes) " << endl;
-                cout << "Please Commit your changes before checkout." << endl;
-                cout << "Aborting" << endl;
-            }
+        }
+
+        else
+        {
+            cout << "error:Your local changes to the following files would be overwritten by checkout :" << endl;
+            cout << "(use \" git status \" to check these local changes) " << endl;
+            cout << "Please Commit your changes before checkout." << endl;
+            cout << "Aborting" << endl;
         }
     }
     else

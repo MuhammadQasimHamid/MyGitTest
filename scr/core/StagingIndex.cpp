@@ -35,18 +35,21 @@ void StagingIndex::load()
 {
     try
     {
-        StagingIndex::indexEntries = {};
-        string indexFileContents = readFile(StagingIndex::indexFilePath);
-        vector<string> lines = split(indexFileContents, '\n');
-        for (auto l : lines)
+        if (exists(indexFilePath))
         {
-            if (l.empty())
-                continue;
-            vector<string> parts = split(l, ' ');
-            if (parts.size() == 4)
+            StagingIndex::indexEntries = {};
+            string indexFileContents = readFile(StagingIndex::indexFilePath);
+            vector<string> lines = split(indexFileContents, '\n');
+            for (auto l : lines)
             {
-                indexEntry iE(parts[0], parts[1], parts[2], parts[3]);
-                StagingIndex::indexEntries.push_back(iE);
+                if (l.empty())
+                    continue;
+                vector<string> parts = split(l, ' ');
+                if (parts.size() == 4)
+                {
+                    indexEntry iE(parts[0], parts[1], parts[2], parts[3]);
+                    StagingIndex::indexEntries.push_back(iE);
+                }
             }
         }
     }
@@ -118,14 +121,14 @@ int StagingIndex::removeDeletedWRFilesFromIndex()
     for (auto it = indexEntries.begin(); it != indexEntries.end();)
     {
         if (Repository::IndexWorkingDirComp(*it, it->path) == CMP_IN_WR_NotExist_WR)
-            {
-                it = indexEntries.erase(it);
-                count++;
-            }
+        {
+            it = indexEntries.erase(it);
+            count++;
+        }
         else
             ++it;
     }
-    return count;    
+    return count;
 }
 bool StagingIndex::addFileToIndex(const path &filePath)
 {

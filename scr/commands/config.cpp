@@ -9,9 +9,10 @@ void configCommandExe(int argc, char *argv[])
 {
     if (argc >= 3)
     {
-        if (argv[2] == "--global")
+        string scopeflag = argv[2];
+        if (scopeflag == "--global")
         {
-            if (argc == 4 && argv[3] == "--list")
+            if (argc == 4 && (string)argv[3] == "--list")
             {
                 // list all global configurations
                 cout << "user.name: " << UserConfig::getGlobalName() << endl;
@@ -19,11 +20,11 @@ void configCommandExe(int argc, char *argv[])
             }
             if (argc == 5)
             {
-                if (argv[3] == "user.name" && argc == 5)
+                if ((string)argv[3] == "user.name" && argc == 5)
                 {
                     UserConfig::setGlobalName(argv[4]);
                 }
-                else if (argv[3] == "user.email" && argc == 5)
+                else if ((string)argv[3] == "user.email" && argc == 5)
                 {
                     UserConfig::setGlobalEmail(argv[4]);
                 }
@@ -33,18 +34,18 @@ void configCommandExe(int argc, char *argv[])
         {
             if (argc == 4)
             {
-                if (argv[2] == "--local" && argv[3] == "--list")
+                if ((string)argv[2] == "--local" && (string)argv[3] == "--list")
                 {
                     // list all local configurations
                     cout << "user.name: " << UserConfig::getLocalName() << endl;
                     cout << "user.email: " << UserConfig::getLocalEmail() << endl;
                 }
-                else if (argv[2] == "user.name")
+                else if ((string)argv[2] == "user.name")
                 {
                     // set local user name
                     UserConfig::setLocalName(argv[3]);
                 }
-                else if (argv[2] == "user.email")
+                else if ((string)argv[2] == "user.email")
                 {
                     // set local user email
                     UserConfig::setLocalEmail(argv[3]);
