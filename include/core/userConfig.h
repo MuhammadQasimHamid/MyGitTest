@@ -10,7 +10,7 @@ public:
     static std::filesystem::path localconfigFilePath;
     static std::filesystem::path globalconfigFilePath;
     static void InitializeClass();
-
+    static void InitLocalConfigFile();
     static void setLocalName(const std::string &name);
     static void setLocalEmail(const std::string &email);
     static std::string getLocalName();
@@ -20,6 +20,9 @@ public:
     static void setGlobalEmail(const std::string &email);
     static std::string getGlobalName();
     static std::string getGlobalEmail();
+    static std::string getName();
+    static std::string getEmail();
+    
 };
 
 #endif

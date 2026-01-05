@@ -44,8 +44,8 @@ void loadConfiguraion()
     cmdCodes["merge"] = mergeCommandExe;
     cmdCodes["config"] = configCommandExe;
 
-    // if(pitRepoExists())
-    // Repository::InitializeClass();
+    // if (pitRepoExists())
+        Repository::InitializeClass();
 }
 int main(int argc, char *argv[])
 {
@@ -58,20 +58,20 @@ int main(int argc, char *argv[])
     }
     else if (true)
     {
-        Repository::InitializeClass();
+        // Repository::InitializeClass();
         cout << "Function Testing---Start" << endl;
         // string fileContents = readFileWithStoredObjectHash("4c3lla28fee213ff64818e0ec871e401639071fda2"); done
         // cout << fileContents << endl;    done
-        // initCommandExe(2, (char*[]){"", "init"});
+        // initCommandExe(2, (char *[]){"", "init"});
         // addCommandExe(3, (char*[]){"", "add", "."});
-
-        // char* ar[]= {"","commit","-m","test"};
-        // commitCommandExe(4,ar);
+        char* ar[]= {"","commit","-m","test"};
+        commitCommandExe(4,ar);
         // statusCommandExe(argc, argv);
         // branchCommandExe(2,(char*[]){"","branch"});
-        logCommandExe(3,(char*[]){"","log","--all"});
+        // logCommandExe(3,(char*[]){"","log","--all"});
         // checkoutCommandExe(3, (char*[]){"","checkout","456446c04ab6636209925c44d7573e54f02c1aec"});
         // cout << Repository::getBranchHash("master")  ; done
+        // configCommandExe(4, (char *[]){"pit" ,"config", "user.email" ,"Qasim@"});
 
         cout << "Function Testing---End" << endl;
         system("pause");
@@ -90,7 +90,7 @@ void callFunc(int argc, char *argv[])
     }
     if (pitRepoExists() || cmdStr == "init")
     {
-        Repository::InitializeClass();
+        // Repository::InitializeClass();
         cmdCodes[cmdStr](argc, argv);
     }
     else
