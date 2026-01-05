@@ -148,7 +148,7 @@ void Repository::generateCommit(string msg)
     }
     vector<string> parentHashs; // Parent Hashes
     parentHashs.push_back(BranchPointToHashOrNothing(currentBranch()));
-    string author = UserConfig::getName() + " <" + UserConfig::getEmail() + ">";
+    string author = UserConfig::getName() + "<" + UserConfig::getEmail() + ">";
     CommitObject CObj(treeHash, parentHashs, author, msg, epochToString(getEpochSeconds()));
     storeObject(CObj);
     // StagingIndex::indexEntries.clear();

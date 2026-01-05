@@ -64,15 +64,15 @@ int main(int argc, char *argv[])
         // cout << fileContents << endl;    done
         // initCommandExe(2, (char *[]){"", "init"});
         // addCommandExe(3, (char*[]){"", "add", "."});
-        char* ar[]= {"","commit","-m","test"};
-        commitCommandExe(4,ar);
+        // char* ar[]= {"","commit","-m","test"};
+        // commitCommandExe(4,ar);
         // statusCommandExe(argc, argv);
         // branchCommandExe(2,(char*[]){"","branch"});
         // logCommandExe(3,(char*[]){"","log","--all"});
         // checkoutCommandExe(3, (char*[]){"","checkout","456446c04ab6636209925c44d7573e54f02c1aec"});
         // cout << Repository::getBranchHash("master")  ; done
         // configCommandExe(4, (char *[]){"pit" ,"config", "user.email" ,"Qasim@"});
-
+        callFunc(3,(char*[]){"pit","checkout","dev"});
         cout << "Function Testing---End" << endl;
         system("pause");
     }
