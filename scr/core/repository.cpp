@@ -49,8 +49,8 @@ fs::path Repository::pitIgnoreFilePath;
 
 void Repository::InitializeClass()
 {
-    // project_absolute = absolute(".");
-    project_absolute = "D:/3rd Sems/DSA/DSAL/VersioningTestUsingPit";
+    project_absolute = absolute(".");
+    // project_absolute = "D:/3rd Sems/DSA/DSAL/VersioningTestUsingPit";
     pitFolderPath = project_absolute / ".pit";
     objectsFolderPath = pitFolderPath / "objects";
     refsFolderPath = pitFolderPath / "refs";
@@ -91,7 +91,7 @@ bool Repository::initRepo() // returns true if repo initialized successfully
             // indexFile.close();
             writeFile(indexFilePath);
 
-           UserConfig::InitLocalConfigFile();
+            UserConfig::InitLocalConfigFile();
         }
         else
         {
