@@ -308,7 +308,7 @@ bool Repository::applyTreeWayMerge(string cBranch, string branchToMerge)
     if (treeHash == "")
     {
         cout << "Nothing to commit, working tree clean" << endl;
-        return;
+        // return;
     }
     vector<string> parentHashs; // Parent Hashes
     parentHashs.push_back(cBranchHash);
