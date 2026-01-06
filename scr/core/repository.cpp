@@ -52,8 +52,8 @@ fs::path Repository::pitIgnoreFilePath;
 
 void Repository::InitializeClass()
 {
-    // project_absolute = absolute(".");
-    project_absolute = "D:/3rd Sems/DSA/DSAL/VersioningTestUsingPit";
+    project_absolute = absolute(".");
+    // project_absolute = "D:/3rd Sems/DSA/DSAL/VersioningTestUsingPit";
     pitFolderPath = project_absolute / ".pit";
     objectsFolderPath = pitFolderPath / "objects";
     refsFolderPath = pitFolderPath / "refs";
@@ -193,6 +193,9 @@ void Repository::mergeBranch(string branchToMerge)
         if (applyTreeWayMerge(cBranch, branchToMerge))
         {
             cout << "3-Way Merge Applied Seccessfully" << endl;
+            char *br = const_cast<char *>(cBranch.c_str());
+            char *args[] = {const_cast<char *>("pit"), const_cast<char *>("checkout"), br};
+            checkoutCommandExe(3, args);
         }
     }
 }
@@ -291,15 +294,42 @@ bool Repository::applyTreeWayMerge(string cBranch, string branchToMerge)
             addToTree = false;
             cout << " deleted in cBranch" << endl;
         }
-        else if (!it.second.val1Exists() && it.second.val2Exists() && it.second.val3Exists())
+        else if (!it.second.val1Exists())
         {
+            if (it.second.val2Exists() && it.second.val3Exists())
+            {
+                if(cBranchTE.hash == branchToMergeTE.hash)
+                {
+                    tE = cBranchTE;
+                    addToTree = true;
+
+                }
+                else
+                {
+                    //confict
+                    // indexEntry iE(tE.mode, tE.hash, "0", filePath.string());
+                    // mergeCommittree.add(iE);
+                    // tE = branchToMergeTE;
+                }
+            }
+            else if (it.second.val2Exists())
+            {
+                addToTree = true;
+                tE = cBranchTE;
+            }
+            else if (it.second.val3Exists())
+            {
+                addToTree = true;
+                tE = branchToMergeTE;
+            }
 
             // new file in both branches
             cout << " new file in both branches" << endl;
         }
+
         if (addToTree)
         {
-            indexEntry iE(tE.mode, tE.mode, "0", filePath.string());
+            indexEntry iE(tE.mode, tE.hash, "0", filePath.string());
             mergeCommittree.add(iE);
         }
     }
@@ -336,7 +366,8 @@ string Repository::getCommanAncestorCommit(string a, string b)
         {
             CommitObject cObj(readFileWithStoredObjectHash(c));
             for (auto &p : cObj.parentHash)
-                q.push(p);
+                if (p != "")
+                    q.push(p);
         }
     }
 
@@ -350,7 +381,8 @@ string Repository::getCommanAncestorCommit(string a, string b)
             return c;
         CommitObject cObj(readFileWithStoredObjectHash(c));
         for (auto &p : cObj.parentHash)
-            q.push(p);
+            if (p != "")
+                q.push(p);
     }
 
     return ""; // should not happen
@@ -366,15 +398,14 @@ bool Repository::applyFastForwardMerge(string baseBranch, string branchToMerge)
     {
         cout << "Traversal" << tempHash << endl;
         // system("pause");
-        string mergeBrFileContents = readFileWithStoredObjectHash(tempHash);
-        CommitObject mergeBrObj(mergeBrFileContents);
-
         if (tempHash == baseBranchHash) // perform merge
         {
             cout << "Fast Forward Merge possible" << endl;
             UpdateBranchHash(baseBranch, mergeToBranchHash);
             return true;
         }
+        string mergeBrFileContents = readFileWithStoredObjectHash(tempHash);
+        CommitObject mergeBrObj(mergeBrFileContents);
         cout << "Parent  " << mergeBrObj.parentHash[0] << endl;
         tempHash = mergeBrObj.parentHash[0];
     }
