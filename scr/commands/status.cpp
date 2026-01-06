@@ -41,7 +41,8 @@ void statusCommandExe(int argc, char *argv[])
     map<path, treeEntry> flattenTree;
     cmpMap<path, indexEntry, treeEntry> cmpMapiEtE;
     for (const auto &iE : StagingIndex::indexEntries)
-        cmpMapiEtE.addVal1(iE.path, iE);
+        if (!StagingIndex::isaConflictFile(iE.path))
+            cmpMapiEtE.addVal1(iE.path, iE);
 
     if (!cBranchHash.empty())
     {
@@ -51,7 +52,10 @@ void statusCommandExe(int argc, char *argv[])
         TreeObject TObj(rawFileContentsTree);
         flattenTree = Repository::FlattenTreeObject(TObj);
         for (auto &kv : flattenTree)
-            cmpMapiEtE.addVal2(kv.first, kv.second);
+        {
+            if (!StagingIndex::isaConflictFile(kv.first))
+                cmpMapiEtE.addVal2(kv.first, kv.second);
+        }
     }
 
     // Compare index vs last commit (staged changes)
@@ -111,49 +115,69 @@ void statusCommandExe(int argc, char *argv[])
     cout << "On Branch " << branch << endl
          << endl;
 
-    cout << "Changes to be committed:" << endl; // index - last commit
-    cout << "  (use 'git restore --staged <file>...' to unstage)" << endl;
-    if (stagedChanges.empty())
+    if (stagedChanges.size() > 0)
     {
-        cout << "\t(no changes added to commit)" << endl;
-    }
-    else
-    {
-        for (const auto &c : stagedChanges)
+        cout << "Changes to be committed:" << endl; // index - last commit
+        cout << "  (use 'git restore --staged <file>...' to unstage)" << endl;
+        if (stagedChanges.empty())
         {
-            const auto filename = fs::path(c.path).filename().string();
-            if (c.type == "modified")
-                cout << GREEN << "\tmodified:" << "    " << filename << RESETCOLOR << endl;
-            else if (c.type == "new file")
-                cout << GREEN << "\tnew file:" << "    " << filename << RESETCOLOR << endl;
-            else
-                cout << GREEN << "\tdeleted:" << "    " << filename << RESETCOLOR << endl;
+            cout << "\t(no changes added to commit)" << endl;
+        }
+        else
+        {
+            for (const auto &c : stagedChanges)
+            {
+                const auto filename = fs::path(c.path).filename().string();
+                if (c.type == "modified")
+                    cout << GREEN << "\tmodified:" << "    " << filename << RESETCOLOR << endl;
+                else if (c.type == "new file")
+                    cout << GREEN << "\tnew file:" << "    " << filename << RESETCOLOR << endl;
+                else
+                    cout << GREEN << "\tdeleted:" << "    " << filename << RESETCOLOR << endl;
+            }
         }
     }
 
-    cout << "Changes not staged for commit:" << endl;
-    if (unstagedChanges.empty())
+    if (unstagedFiles.size() > 0)
     {
-        cout << "\t(none)" << endl;
-    }
-    else
-    {
-        for (const auto &c : unstagedChanges)
+        cout << "Changes not staged for commit:" << endl;
+        if (unstagedChanges.empty())
         {
-            if (c.type == "modified")
-                cout << RED << "\tmodified" << " " << c.path << RESETCOLOR << endl;
-            else
-                cout << RED << "\tdeleted" << " " << c.path << RESETCOLOR << endl;
+            cout << "\t(none)" << endl;
+        }
+        else
+        {
+            for (const auto &c : unstagedChanges)
+            {
+                if (c.type == "modified")
+                    cout << RED << "\tmodified" << " " << c.path << RESETCOLOR << endl;
+                else
+                    cout << RED << "\tdeleted" << " " << c.path << RESETCOLOR << endl;
+            }
         }
     }
-
     if (stagedChanges.empty() && unstagedChanges.empty())
         cout << "Working Area Clean, nothing to commit" << endl;
 
-    cout << "Untracked files:" << endl;
-    cout << "(use \" git add<file>... \" to include in what will be committed)" << endl;
-    for (const auto &u : untrackedFiles)
-        cout << RED << "\tUntracked: " << u << RESETCOLOR << endl;
+    if (untrackedFiles.size() > 0)
+    {
+        cout << "Untracked files:" << endl;
+        cout << "(use \" git add<file>... \" to include in what will be committed)" << endl;
+        for (const auto &u : untrackedFiles)
+            cout << RED << "\tUntracked: " << u << RESETCOLOR << endl;
+    }
+
+    if (StagingIndex::IndexHasConflicts())
+    {
+        cout << "Unmerged paths:" << endl;
+        for (auto pair : flattenTree)
+        {
+            if (StagingIndex::isaConflictFile(pair.first))
+            {
+                cout << RED << "\tconflict: " << pair.first << RESETCOLOR << endl;
+            }
+        }
+    }
 }
 
 void statusJSON(
