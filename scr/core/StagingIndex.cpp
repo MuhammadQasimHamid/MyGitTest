@@ -18,6 +18,14 @@ void StagingIndex::InitializeClass(const path &indexFilePath)
     load();
 }
 
+ bool StagingIndex::IndexHasConflicts()
+{
+    for(auto iE:indexEntries)
+    {
+        if(iE.offset!="0")
+            return true;
+    }
+}
 void StagingIndex::addEntry(const indexEntry &entry)
 {
     StagingIndex::indexEntries.push_back(entry);

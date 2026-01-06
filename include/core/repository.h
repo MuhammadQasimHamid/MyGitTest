@@ -66,6 +66,7 @@ public:
     static bool applyFastForwardMerge(string baseBranch, string branchToMerge);
     static bool applyTreeWayMerge(string baseBranch, string branchToMerge);
     static string getCommanAncestorCommit(string a, string b);
+    static bool isMergingInProgress();
     static string currentBranch();
     static string BranchPointToHashOrNothing(string branch);
     static void UpdateBranchHash(string branch, string hash);

@@ -53,7 +53,7 @@ public:
     static int removeDeletedWRFilesFromIndex();
 
     static bool isTrackedFile(const path &filePath);
-
+    static bool IndexHasConflicts();
     static indexEntry *getEntry(const path &filePath);
 
 };
