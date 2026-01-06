@@ -12,10 +12,17 @@ void commitCommandExe(int argc, char *argv[])
         string flag = argv[3 - 1];
         if (flag == "-m")
         {
-            cout << "Commited " << endl;
-            string msg = argv[4 - 1];
-           
-            Repository::generateCommit(msg);
+            if(Repository::stagedChangesExist())
+            {
+                cout << "Commited " << endl;
+                string msg = argv[4 - 1];
+               
+                Repository::generateCommit(msg);
+            }
+            else
+            {
+                cout << "No changes staged for commit." << endl;
+            }
         }
     }
 }
