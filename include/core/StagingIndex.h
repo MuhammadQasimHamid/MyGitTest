@@ -46,12 +46,12 @@ public:
     static void load();
 
     static void save();
-    
+    static void removeThisFileFromAllIndexEntries(const path &filePath);
     static bool addPathToIndex(const path &dirPath);
     static bool addFileToIndex(const path &filePath);
     static bool addDirectory(const path &dirPath);
     static int removeDeletedWRFilesFromIndex();
-
+    static bool isaConflictFile(const path &filePath);
     static bool isTrackedFile(const path &filePath);
     static bool IndexHasConflicts();
     static indexEntry *getEntry(const path &filePath);

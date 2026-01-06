@@ -52,8 +52,8 @@ fs::path Repository::pitIgnoreFilePath;
 
 void Repository::InitializeClass()
 {
-    project_absolute = absolute(".");
-    // project_absolute = "D:/3rd Sems/DSA/DSAL/VersioningTestUsingPit";
+    // project_absolute = absolute(".");
+    project_absolute = "D:/3rd Sems/DSA/DSAL/VersioningTestUsingPit";
     pitFolderPath = project_absolute / ".pit";
     objectsFolderPath = pitFolderPath / "objects";
     refsFolderPath = pitFolderPath / "refs";
@@ -121,6 +121,7 @@ string Repository::storeObject(GitObject gitObj)
 
     string objectName = objHash.substr(2);
     path objectFilePath = objectDirPath / objectName;
+    cout << "going to store object with hash: " << objHash << endl;
     try
     {
         if (!exists(objectDirPath))
@@ -154,10 +155,14 @@ void Repository::generateCommit(string msg)
         }
         cout << "Merging in progress. Completing merge commit." << endl;
 
+        path mergeMsgFile = Repository::pitFolderPath / "MERGE_MSG";
         path mergeHeadFile = Repository::pitFolderPath / "MERGE_HEAD";
         string mergeCommitHash = readFile(mergeHeadFile);
         parentHashs.push_back(mergeCommitHash);
         msg = "Merge commit: " + msg;
+        deleteFile(mergeHeadFile);
+        deleteFile(mergeMsgFile);
+
         // return;
     }
     string treeHash = StoreIndexForCommit(); // TreeHash
@@ -301,7 +306,12 @@ bool Repository::applyTreeWayMerge(string cBranch, string branchToMerge)
             {
                 // changed in both - conflict
                 cout << " changed in both - CONFLICT" << endl;
-                
+                indexEntry iE1(ancestorTE.mode, ancestorTE.hash, "1", filePath.string());
+                indexEntry iE2(cBranchTE.mode, cBranchTE.hash, "2", filePath.string());
+                indexEntry iE3(branchToMergeTE.mode, branchToMergeTE.hash, "3", filePath.string());
+                StagingIndex::addEntry(iE1); // add to index also
+                StagingIndex::addEntry(iE2);
+                StagingIndex::addEntry(iE3);
                 hasConflict = true;
                 addToTree = true;
             }
@@ -335,10 +345,17 @@ bool Repository::applyTreeWayMerge(string cBranch, string branchToMerge)
                 {
                     tE = cBranchTE;
                     addToTree = true;
+                    cout << " added in both branches with same content" << endl;
                 }
                 else
                 {
+                    addToTree = true;
                     hasConflict = true;
+                    cout << "conflict detected " << endl;
+                    indexEntry iE2(cBranchTE.mode, cBranchTE.hash, "2", filePath.string());
+                    indexEntry iE3(branchToMergeTE.mode, branchToMergeTE.hash, "3", filePath.string());
+                    StagingIndex::addEntry(iE2);
+                    StagingIndex::addEntry(iE3);
                     // confict
                     //  indexEntry iE(tE.mode, tE.hash, "0", filePath.string());
                     //  mergeCommittree.add(iE);
@@ -361,18 +378,13 @@ bool Repository::applyTreeWayMerge(string cBranch, string branchToMerge)
         {
             if (hasConflict)
             {
-                indexEntry iE1(ancestorTE.mode, ancestorTE.hash, "1", filePath.string());
-                indexEntry iE2(cBranchTE.mode, cBranchTE.hash, "2", filePath.string());
-                indexEntry iE3(branchToMergeTE.mode, branchToMergeTE.hash, "3", filePath.string());
-                StagingIndex::addEntry(iE1); // add to index also
-                StagingIndex::addEntry(iE2);
-                StagingIndex::addEntry(iE3);
+
                 string cBranchFileContents = readFileWithStoredObjectHash(cBranchTE.hash);
                 string branchToMergeFileContents = readFileWithStoredObjectHash(branchToMergeTE.hash);
-               
+
                 BlobObject cBranchBlob = BlobObject(cBranchFileContents);
                 BlobObject branchToMergeBlob = BlobObject(branchToMergeFileContents);
-                
+
                 string conflict =
                     "<<<<<<< HEAD\n" +
                     cBranchBlob.contents +
@@ -381,6 +393,7 @@ bool Repository::applyTreeWayMerge(string cBranch, string branchToMerge)
                     "\n>>>>>>> " + branchToMerge + "\n";
                 BlobObject conflictBlob(branchToMergeTE.name, conflict);
                 string conflictBlobHash = Repository::storeObject(conflictBlob);
+                cout <<  "Conflict Blob Stored with hash: " << conflictBlobHash << endl;
                 writeFile(filePath, conflictBlob.contents); // write conflict to working directory
                 anyConflictFoundInMerging = true;
             }
@@ -389,7 +402,7 @@ bool Repository::applyTreeWayMerge(string cBranch, string branchToMerge)
                 indexEntry iE(tE.mode, tE.hash, "0", filePath.string());
                 StagingIndex::addEntry(iE); // add to index also
                 BlobObject bObj(readFileWithStoredObjectHash(tE.hash));
-                writeFile(filePath, bObj.contents); // write to working directory 
+                writeFile(filePath, bObj.contents); // write to working directory
             }
         }
     }
@@ -418,7 +431,6 @@ bool Repository::applyTreeWayMerge(string cBranch, string branchToMerge)
     // string msg = branchToMerge + " merged into " + cBranch;
     // CommitObject CObj(treeHash, parentHashs, author, msg, epochToString(getEpochSeconds()));
     // storeObject(CObj);
-    UpdateBranchHash(branchToMerge, BranchPointToHashOrNothing(cBranch)); // update branchHash to new CBranch hash
     return true;
 }
 string Repository::getCommanAncestorCommit(string a, string b)

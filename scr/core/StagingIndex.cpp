@@ -18,13 +18,14 @@ void StagingIndex::InitializeClass(const path &indexFilePath)
     load();
 }
 
- bool StagingIndex::IndexHasConflicts()
+bool StagingIndex::IndexHasConflicts()
 {
-    for(auto iE:indexEntries)
+    for (auto iE : indexEntries)
     {
-        if(iE.offset!="0")
+        if (iE.offset != "0")
             return true;
     }
+    return false;
 }
 void StagingIndex::addEntry(const indexEntry &entry)
 {
@@ -75,7 +76,18 @@ void StagingIndex::save()
     }
     writeFile(indexFilePath, indexFileContents);
 }
-
+bool StagingIndex::isaConflictFile(const path &filePath)
+{
+    for (const auto &iE : indexEntries)
+    {
+        path relPath = relative(absolute(filePath), Repository::project_absolute);
+        if (iE.path == relPath && iE.offset != "0") // compare paths correctly
+        {
+            return true;
+        }
+    }
+    return false;
+}
 bool StagingIndex::isTrackedFile(const path &filePath)
 {
     for (const auto &iE : indexEntries)
@@ -108,7 +120,7 @@ bool StagingIndex::addPathToIndex(const path &dirPath)
     if (is_directory(relativePath))
     {
         addDirectory(relativePath);
-        if (relativePath == ".")
+        if (relativePath == ".") // specific case for root directory
         {
             removeDeletedWRFilesFromIndex();
             save(); // update
@@ -157,15 +169,36 @@ bool StagingIndex::addFileToIndex(const path &filePath)
 
     if (isTrackedFile(relPath))
     {
-        updateEntry(relPath, hash, "100644");
-        save();
-        return true;
+        if (isaConflictFile(filePath))
+        {
+            removeThisFileFromAllIndexEntries(filePath);
+            // save
+        }
+        else
+        {
+            updateEntry(relPath, hash, "100644");
+            save();
+            return true;
+        }
     }
+
     indexEntry iE("100644", hash, "0", relPath.string());
     addEntry(iE);
     save();
     cout << filePath << " added" << endl;
     return true;
+}
+void StagingIndex::removeThisFileFromAllIndexEntries(const path &filePath)
+{
+    vector<indexEntry> tempIndexEntires;
+    for (auto &iE : indexEntries)
+    {
+        if (iE.path != relative(absolute(filePath), Repository::project_absolute).string()) // compare paths correctly
+        {
+            tempIndexEntires.push_back(iE);
+        }
+    }
+    indexEntries = tempIndexEntires;
 }
 
 bool StagingIndex::addDirectory(const path &dirPath)
