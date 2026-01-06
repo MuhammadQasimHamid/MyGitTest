@@ -37,7 +37,7 @@ void loadConfiguraion()
     cmdCodes["cat-file"] = catfileCommandExe;
     cmdCodes["log"] = logCommandExe;
     // if(pitRepoExists())
-        Repository::InitializeClass();
+        // Repository::InitializeClass();
 }
 int main(int argc, char *argv[])
 {
@@ -50,6 +50,7 @@ int main(int argc, char *argv[])
     }
     else if(true)
     {
+        Repository::InitializeClass();
         cout << "Function Testing---Start" << endl;
         // string fileContents = readFileWithStoredObjectHash("4c3lla28fee213ff64818e0ec871e401639071fda2"); done
         // cout << fileContents << endl;    done
@@ -79,7 +80,7 @@ void callFunc(int argc, char *argv[])
     }
     if(pitRepoExists() || cmdStr == "init")
     {
-        // Repository::InitializeClass();
+        Repository::InitializeClass();
         cmdCodes[cmdStr](argc, argv);
     }
     else
