@@ -7,7 +7,6 @@
 #include "dataStructure/Ntree.h"
 #include "utils/json_helper.h"
 
-
 using namespace std;
 // #undef byte
 // #include <windows.h>

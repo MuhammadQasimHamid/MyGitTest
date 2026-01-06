@@ -3,6 +3,8 @@
 #include <filesystem>
 #include <algorithm>
 #include <map>
+#include <queue>
+#include <unordered_set>
 #include "utils/mytime.h"
 #include "core/repository.h"
 #include "core/gitObject.h"
@@ -11,6 +13,7 @@
 #include "utils/fileCRUD.h"
 #include "dataStructure/Ntree.h"
 #include "utils/myparser.h"
+#include "commands/checkout.h"
 #include "utils/mysha1.h"
 
 FileStatus sToFileStatus(string str)
@@ -49,8 +52,8 @@ fs::path Repository::pitIgnoreFilePath;
 
 void Repository::InitializeClass()
 {
-    project_absolute = absolute(".");
-    // project_absolute = "D:/3rd Sems/DSA/DSAL/VersioningTestUsingPit";
+    // project_absolute = absolute(".");
+    project_absolute = "D:/3rd Sems/DSA/DSAL/VersioningTestUsingPit";
     pitFolderPath = project_absolute / ".pit";
     objectsFolderPath = pitFolderPath / "objects";
     refsFolderPath = pitFolderPath / "refs";
@@ -170,6 +173,214 @@ string Repository::StoreIndexForCommit()
     string hash = StoreTreeRec(tree.root);
     return hash;
 }
+void Repository::mergeBranch(string branchToMerge)
+{
+    string cBranch = currentBranch();
+    if (branchToMerge == cBranch)
+    {
+        cout << "Cannot merge a branch into itself." << endl;
+        return;
+    }
+    if (applyFastForwardMerge(cBranch, branchToMerge))
+    {
+        cout << "Fast Forward applied" << endl;
+        char *br = const_cast<char *>(cBranch.c_str());
+        char *args[] = {const_cast<char *>("pit"), const_cast<char *>("checkout"), br};
+        checkoutCommandExe(3, args);
+    }
+    else
+    {
+        if (applyTreeWayMerge(cBranch, branchToMerge))
+        {
+            cout << "3-Way Merge Applied Seccessfully" << endl;
+        }
+    }
+}
+
+bool Repository::applyTreeWayMerge(string cBranch, string branchToMerge)
+{
+    string branchToMergeHash = Repository::BranchPointToHashOrNothing(branchToMerge);
+    string cBranchHash = Repository::BranchPointToHashOrNothing(cBranch);
+    string ancestorCommitHash = getCommanAncestorCommit(cBranchHash, branchToMergeHash);
+    CommitObject ancestorCommitObj(readFileWithStoredObjectHash(ancestorCommitHash));
+    CommitObject cBranchCommitObj(readFileWithStoredObjectHash(cBranchHash));
+    CommitObject branchToMergeCommitObj(readFileWithStoredObjectHash(branchToMergeHash));
+    TreeObject ancestorTreeObj(readFileWithStoredObjectHash(ancestorCommitObj.treeHash));
+    TreeObject cBranchTreeObj(readFileWithStoredObjectHash(cBranchCommitObj.treeHash));
+    TreeObject branchToMergeTreeObj(readFileWithStoredObjectHash(branchToMergeCommitObj.treeHash));
+    map<path, treeEntry> ancestorFlattenTree = Repository::FlattenTreeObject(ancestorTreeObj);
+    map<path, treeEntry> cBranchFlattenTree = Repository::FlattenTreeObject(cBranchTreeObj);
+    map<path, treeEntry> branchToMergeFlattenTree = Repository::FlattenTreeObject(branchToMergeTreeObj);
+    cmpThWayMap<path, treeEntry, treeEntry, treeEntry> cmpMap3Way;
+    TreeObject mergedTreeObj;
+
+    for (auto it : ancestorFlattenTree)
+    {
+        treeEntry tE = it.second;
+        cmpMap3Way.addVal1(it.first, tE);
+    }
+    for (auto it : cBranchFlattenTree)
+    {
+        treeEntry tE = it.second;
+        cmpMap3Way.addVal2(it.first, tE);
+    }
+    for (auto it : branchToMergeFlattenTree)
+    {
+        treeEntry tE = it.second;
+        cmpMap3Way.addVal3(it.first, tE);
+    }
+    cout << "3 Way Comparison Table: " << endl;
+    for (auto it : cmpMap3Way.umap)
+    {
+        cout << it.first << " : ";
+        cout << " Val1Exists:(ancestor) " << it.second.val1Exists() << " , ";
+        cout << " Val2Exists:(cBranch) " << it.second.val2Exists() << " , ";
+        cout << " Val3Exists:(branchToMerge) " << it.second.val3Exists() << endl;
+    }
+    NTree mergeCommittree = NTree();
+    for (auto it : cmpMap3Way.umap)
+    {
+        const path &filePath = it.first;
+        cout << filePath;
+        treeEntry ancestorTE = it.second.getVal1();
+        treeEntry cBranchTE = it.second.getVal2();
+        treeEntry branchToMergeTE = it.second.getVal3();
+        treeEntry tE;
+        bool addToTree = false;
+        if (it.second.val1Exists() && it.second.val2Exists() && it.second.val3Exists())
+        {
+            // present in all three
+            if (ancestorTE.hash == cBranchTE.hash && ancestorTE.hash == branchToMergeTE.hash)
+            {
+                // same in all three
+                tE = ancestorTE;
+                addToTree = true;
+                cout << "  same in all three" << endl;
+            }
+            else if (ancestorTE.hash == cBranchTE.hash && ancestorTE.hash != branchToMergeTE.hash)
+            {
+                // changed in branchToMerge only
+                tE = branchToMergeTE;
+                addToTree = true;
+                cout << " changed in branchToMerge only" << endl;
+            }
+            else if (ancestorTE.hash != cBranchTE.hash && ancestorTE.hash == branchToMergeTE.hash)
+            {
+                // changed in cBranch only
+                tE = cBranchTE;
+                addToTree = true;
+                cout << " changed in cBranch only" << endl;
+            }
+            else
+            {
+                // changed in both - conflict
+                cout << " changed in both - CONFLICT" << endl;
+            }
+        }
+        else if (it.second.val1Exists() && it.second.val2Exists() && !it.second.val3Exists())
+        {
+            // deleted in branchToMerge (Theirs)
+            tE = cBranchTE;
+            addToTree = true;
+            cout << " deleted in branchToMerge" << endl;
+        }
+        else if (it.second.val1Exists() && !it.second.val2Exists() && it.second.val3Exists())
+        {
+            // deleted in cBranch (Ours) so keep deletion
+            // tE
+            addToTree = false;
+            cout << " deleted in cBranch" << endl;
+        }
+        else if (!it.second.val1Exists() && it.second.val2Exists() && it.second.val3Exists())
+        {
+
+            // new file in both branches
+            cout << " new file in both branches" << endl;
+        }
+        if (addToTree)
+        {
+            indexEntry iE(tE.mode, tE.mode, "0", filePath.string());
+            mergeCommittree.add(iE);
+        }
+    }
+
+    string treeHash = StoreTreeRec(mergeCommittree.root);
+    if (treeHash == "")
+    {
+        cout << "Nothing to commit, working tree clean" << endl;
+        return;
+    }
+    vector<string> parentHashs; // Parent Hashes
+    parentHashs.push_back(cBranchHash);
+    parentHashs.push_back(branchToMergeHash);
+    string author = UserConfig::getName() + "<" + UserConfig::getEmail() + ">";
+    string msg = branchToMerge + " merged into " + cBranch;
+    CommitObject CObj(treeHash, parentHashs, author, msg, epochToString(getEpochSeconds()));
+    storeObject(CObj);
+    UpdateBranchHash(cBranch, CObj.getHash());
+    UpdateBranchHash(branchToMerge, CObj.getHash());
+    return true;
+}
+string Repository::getCommanAncestorCommit(string a, string b)
+{
+    unordered_set<string> ancestors;
+
+    // Collect all ancestors of A
+    queue<string> q;
+    q.push(a);
+    while (!q.empty())
+    {
+        string c = q.front();
+        q.pop();
+        if (ancestors.insert(c).second)
+        {
+            CommitObject cObj(readFileWithStoredObjectHash(c));
+            for (auto &p : cObj.parentHash)
+                q.push(p);
+        }
+    }
+
+    // Walk B until we hit an ancestor
+    q.push(b);
+    while (!q.empty())
+    {
+        string c = q.front();
+        q.pop();
+        if (ancestors.count(c))
+            return c;
+        CommitObject cObj(readFileWithStoredObjectHash(c));
+        for (auto &p : cObj.parentHash)
+            q.push(p);
+    }
+
+    return ""; // should not happen
+}
+bool Repository::applyFastForwardMerge(string baseBranch, string branchToMerge)
+{
+    string baseBranchHash = Repository::BranchPointToHashOrNothing(baseBranch);
+    string mergeToBranchHash = Repository::BranchPointToHashOrNothing(branchToMerge);
+    cout << "base: " << baseBranchHash << endl;
+    cout << "mergeToBranch: " << mergeToBranchHash << endl;
+    string tempHash = mergeToBranchHash;
+    while (tempHash != "")
+    {
+        cout << "Traversal" << tempHash << endl;
+        // system("pause");
+        string mergeBrFileContents = readFileWithStoredObjectHash(tempHash);
+        CommitObject mergeBrObj(mergeBrFileContents);
+
+        if (tempHash == baseBranchHash) // perform merge
+        {
+            cout << "Fast Forward Merge possible" << endl;
+            UpdateBranchHash(baseBranch, mergeToBranchHash);
+            return true;
+        }
+        cout << "Parent  " << mergeBrObj.parentHash[0] << endl;
+        tempHash = mergeBrObj.parentHash[0];
+    }
+    cout << "Fast Forward Merge not possible" << endl;
+    return false;
+}
 
 string Repository::StoreTreeRec(TreeNode *node)
 {
@@ -209,7 +420,14 @@ string Repository::StoreTreeRec(TreeNode *node)
     node->hash = treeHash;
     return treeHash;
 }
-
+bool Repository::isaBranch(string branchToCheck)
+{
+    vector<string> allBranches = getAllBranches();
+    for (auto br : allBranches)
+        if (br == branchToCheck)
+            return true;
+    return false;
+}
 string Repository::currentBranch()
 {
     string line = readFile(HEADFilePath);
@@ -221,7 +439,7 @@ string Repository::currentBranch()
 }
 string Repository::BranchPointToHashOrNothing(string branch)
 {
-    string branchHashOrNothing = readFile(Repository::refsHeadFolderPath/branch);
+    string branchHashOrNothing = readFile(Repository::refsHeadFolderPath / branch);
     cout << "main:" << branchHashOrNothing << endl;
     return branchHashOrNothing;
 }
@@ -229,7 +447,7 @@ void Repository::UpdateBranchHash(string branch, string hash)
 {
     path branchFile = refsHeadFolderPath / branch;
     cout << "Branch Update: " << (branchFile.string()) << " hash: " << hash;
-    writeFile(Repository::refsHeadFolderPath/branch, hash); // change it letter (we will not hardcode)
+    writeFile(Repository::refsHeadFolderPath / branch, hash); // change it letter (we will not hardcode)
 }
 string Repository::getBranchHash(string branch)
 {

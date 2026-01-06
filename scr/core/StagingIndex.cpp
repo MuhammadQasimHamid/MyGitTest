@@ -72,7 +72,8 @@ bool StagingIndex::isTrackedFile(const path &filePath)
 {
     for (const auto &iE : indexEntries)
     {
-        if (iE.path == relative(absolute(filePath), Repository::project_absolute).string()) // compare paths correctly
+        path relPath = relative(absolute(filePath), Repository::project_absolute);
+        if (iE.path == relPath) // compare paths correctly
         {
             return true;
         }

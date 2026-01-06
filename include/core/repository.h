@@ -62,7 +62,10 @@ public:
     static void generateCommit(string msg);
 
     static string StoreIndexForCommit();
-
+    static void mergeBranch(string branchToMerge);
+    static bool applyFastForwardMerge(string baseBranch, string branchToMerge);
+    static bool applyTreeWayMerge(string baseBranch, string branchToMerge);
+    static string getCommanAncestorCommit(string a, string b);
     static string currentBranch();
     static string BranchPointToHashOrNothing(string branch);
     static void UpdateBranchHash(string branch, string hash);
@@ -72,7 +75,7 @@ public:
     static pair<string,string> getHEAD();
 
     static string StoreTreeRec(TreeNode *node);
-
+    static bool isaBranch(string branchToCheck);
     static bool isInPitIgnore(fs::path pathtoCheck);
     static bool stagedChangesExist();
     static bool unstagedChangesExist();
