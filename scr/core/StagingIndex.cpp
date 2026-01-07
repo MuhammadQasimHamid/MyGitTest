@@ -218,7 +218,7 @@ bool StagingIndex::addDirectory(const path &dirPath)
             // Check if current directory is .git or .pit
             if (is_directory(entry.path()) && (filename == ".git" || filename == ".pit" || filename == "node_modules" || filename == ".svn" || filename == ".vscode" || filename == "__pycache__" || filename == ".gitignore" || filename == "build"))
             {
-                cout << "Skipping system directory and its contents: " << entry.path() << endl;
+                // cout << "Skipping system directory and its contents: " << entry.path() << endl;
                 // This prevents the iterator from entering this folder
                 it.disable_recursion_pending();
                 continue;

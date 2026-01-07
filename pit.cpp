@@ -32,7 +32,7 @@ bool pitRepoExists();
 void printArgs(int argc, char *argv[]);
 void loadConfiguraion()
 {
-    cmdCodes["init"] = initCommandExe;
+    // cmdCodes["init"] = initCommandExe;
     cmdCodes["add"] = addCommandExe;
     cmdCodes["--help"] = helpCommandExe;
     cmdCodes["commit"] = commitCommandExe;
@@ -83,14 +83,23 @@ void callFunc(int argc, char *argv[])
 {
 
     string cmdStr = argv[1];
-    if (cmdCodes.find(cmdStr) == cmdCodes.end())
+    if (cmdCodes.find(cmdStr) == cmdCodes.end() && cmdStr != "init")
     {
         cout << "Invalid Command" << endl;
         return;
     }
-    if (pitRepoExists() || cmdStr == "init")
+    if(cmdStr == "init" && !pitRepoExists())
     {
         // Repository::InitializeClass();
+        initCommandExe(argc, argv);
+    }
+    else if (pitRepoExists())
+    {
+        if(cmdStr == "init")
+        {
+            cout << "Pit repo already exists in this directory..." << endl;
+            return;
+        }
         cmdCodes[cmdStr](argc, argv);
     }
     else

@@ -63,8 +63,8 @@ void statusCommandExe(int argc, char *argv[])
     // Compare index vs last commit (staged changes)
     for (auto &cmpRow : cmpMapiEtE.umap)
     {
-        cout << "Comparison Table" << endl;
-        cout << cmpRow.first << "IE: " << cmpRow.second.val1Exists() << " TE: " << cmpRow.second.val2Exists() << endl;
+        // cout << "Comparison Table" << endl;
+        // cout << cmpRow.first << "IE: " << cmpRow.second.val1Exists() << " TE: " << cmpRow.second.val2Exists() << endl;
         const path &key = cmpRow.first;
         const string filepath = key.generic_string();
         cmpPair iEtEPair = cmpRow.second;

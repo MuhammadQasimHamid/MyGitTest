@@ -121,7 +121,7 @@ string Repository::storeObject(GitObject gitObj)
 
     string objectName = objHash.substr(2);
     path objectFilePath = objectDirPath / objectName;
-    cout << "going to store object with hash: " << objHash << endl;
+    // cout << "going to store object with hash: " << objHash << endl;
     try
     {
         if (!exists(objectDirPath))
@@ -260,14 +260,14 @@ bool Repository::applyTreeWayMerge(string cBranch, string branchToMerge)
         treeEntry tE = it.second;
         cmpMap3Way.addVal3(it.first, tE);
     }
-    cout << "3 Way Comparison Table: " << endl;
-    for (auto it : cmpMap3Way.umap)
-    {
-        cout << it.first << " : ";
-        cout << " Val1Exists:(ancestor) " << it.second.val1Exists() << " , ";
-        cout << " Val2Exists:(cBranch) " << it.second.val2Exists() << " , ";
-        cout << " Val3Exists:(branchToMerge) " << it.second.val3Exists() << endl;
-    }
+    // cout << "3 Way Comparison Table: " << endl;
+    // for (auto it : cmpMap3Way.umap)
+    // {
+    //     cout << it.first << " : ";
+    //     cout << " Val1Exists:(ancestor) " << it.second.val1Exists() << " , ";
+    //     cout << " Val2Exists:(cBranch) " << it.second.val2Exists() << " , ";
+    //     cout << " Val3Exists:(branchToMerge) " << it.second.val3Exists() << endl;
+    // }
     for (auto it : cmpMap3Way.umap)
     {
         const path &filePath = it.first;
@@ -473,12 +473,12 @@ bool Repository::applyFastForwardMerge(string baseBranch, string branchToMerge)
 {
     string baseBranchHash = Repository::BranchPointToHashOrNothing(baseBranch);
     string mergeToBranchHash = Repository::BranchPointToHashOrNothing(branchToMerge);
-    cout << "base: " << baseBranchHash << endl;
-    cout << "mergeToBranch: " << mergeToBranchHash << endl;
+    // cout << "base: " << baseBranchHash << endl;
+    // cout << "mergeToBranch: " << mergeToBranchHash << endl;
     string tempHash = mergeToBranchHash;
     while (tempHash != "")
     {
-        cout << "Traversal" << tempHash << endl;
+        // cout << "Traversal" << tempHash << endl;
         // system("pause");
         if (tempHash == baseBranchHash) // perform merge
         {
@@ -488,7 +488,7 @@ bool Repository::applyFastForwardMerge(string baseBranch, string branchToMerge)
         }
         string mergeBrFileContents = readFileWithStoredObjectHash(tempHash);
         CommitObject mergeBrObj(mergeBrFileContents);
-        cout << "Parent  " << mergeBrObj.parentHash[0] << endl;
+        // cout << "Parent  " << mergeBrObj.parentHash[0] << endl;
         tempHash = mergeBrObj.parentHash[0];
     }
     cout << "Fast Forward Merge not possible" << endl;
@@ -497,7 +497,7 @@ bool Repository::applyFastForwardMerge(string baseBranch, string branchToMerge)
 
 string Repository::StoreTreeRec(TreeNode *node)
 {
-    cout << "Visiting Node: " << node->name << endl;
+    // cout << "Visiting Node: " << node->name << endl;
     // FILE → blob already exists
     if (node->isFile)
     {
@@ -553,13 +553,13 @@ string Repository::currentBranch()
 string Repository::BranchPointToHashOrNothing(string branch)
 {
     string branchHashOrNothing = readFile(Repository::refsHeadFolderPath / branch);
-    cout << "main:" << branchHashOrNothing << endl;
+    // cout << "main:" << branchHashOrNothing << endl;
     return branchHashOrNothing;
 }
 void Repository::UpdateBranchHash(string branch, string hash)
 {
     path branchFile = refsHeadFolderPath / branch;
-    cout << "Branch Update: " << (branchFile.string()) << " hash: " << hash;
+    // cout << "Branch Update: " << (branchFile.string()) << " hash: " << hash;
     writeFile(Repository::refsHeadFolderPath / branch, hash); // change it letter (we will not hardcode)
 }
 string Repository::getBranchHash(string branch)

@@ -8,7 +8,7 @@
       "program": "${workspaceFolder}/build/bin/pit",
       "args": [],
       "stopAtEntry": false,
-      "cwd": "D:/3rd Sems/DSA/DSAL/VersioningTestUsingPit",
+      "cwd": "${workspaceFolder}",
       "environment": [],
       "externalConsole": true,
       "MIMode": "gdb",

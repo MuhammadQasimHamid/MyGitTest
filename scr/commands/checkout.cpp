@@ -58,13 +58,13 @@ void checkoutCommandExe(int argc, char *argv[])
                     traverseDirectory(Repository::project_absolute, [&](const fs::path &relPath)
                                       { cmptEPa.addVal2(relPath, relPath); });
 
-                    cout << "Comparison Table: " << endl;
-                    for(auto it: cmptEPa.umap)
-                    {
-                        cout << it.first << " : ";
-                        cout << " Val1Exists:(lastCommit) " << it.second.val1Exists() << " , ";
-                        cout << " Val2Exists:(WR) " << it.second.val2Exists() << endl;
-                    }
+                    // cout << "Comparison Table: " << endl;
+                    // for(auto it: cmptEPa.umap)
+                    // {
+                    //     cout << it.first << " : ";
+                    //     cout << " Val1Exists:(lastCommit) " << it.second.val1Exists() << " , ";
+                    //     cout << " Val2Exists:(WR) " << it.second.val2Exists() << endl;
+                    // }
 
 
                     for (auto it : cmptEPa.umap)
