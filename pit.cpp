@@ -45,7 +45,7 @@ void loadConfiguraion()
     cmdCodes["config"] = configCommandExe;
 
     // if (pitRepoExists())
-        Repository::InitializeClass();
+    Repository::InitializeClass();
 }
 int main(int argc, char *argv[])
 {
@@ -72,7 +72,8 @@ int main(int argc, char *argv[])
         // checkoutCommandExe(3, (char*[]){"","checkout","456446c04ab6636209925c44d7573e54f02c1aec"});
         // cout << Repository::getBranchHash("master")  ; done
         // configCommandExe(4, (char *[]){"pit" ,"config", "user.email" ,"Qasim@"});
-        callFunc(3,(char*[]){"pit","checkout","dev"});
+        callFunc(4, (char *[]){"pit", "log", "--all", "--json"});
+
         cout << "Function Testing---End" << endl;
         system("pause");
     }

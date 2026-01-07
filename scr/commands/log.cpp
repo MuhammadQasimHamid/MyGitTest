@@ -144,7 +144,10 @@ void logCommandExe(int argc, char *argv[])
 
             string rawCommitObjectContents = readFileWithStoredObjectHash(commitHash);
             CommitObject cObj(rawCommitObjectContents); // deserilize
-
+            if (cObj.parentHash == vector<string>{""})
+            {
+                cObj.parentHash = {};
+            }
             allCommits.push_back(
                 {commitHash,
                  cObj.message,
@@ -183,11 +186,16 @@ void printLogJSON(
         const LogCommit &c = allCommits[i];
 
         cout << "    {\n";
-        printString("hash", c.hash, true);
-        printString("message", c.message, true);
-        printString("author", c.author, true);
-        printString("timestamp", c.timestamp, true);
-        printArray("parents", c.parents, false);
+        printString("commit", c.hash, true);
+        printArray("parents", c.parents, true);
+        beginNamedObject("author");
+        printingAuthorCommitter(c.author, c.timestamp);
+        endNamedObject(true);
+        beginNamedObject("committer");
+        printingAuthorCommitter(c.author, c.timestamp);
+        endNamedObject(true);
+        printString("subject", c.message, true);
+        printString("body", c.message, false);
         cout << "    }";
 
         if (i + 1 < allCommits.size())
@@ -196,11 +204,8 @@ void printLogJSON(
     }
     cout << "  ],\n";
 
-    // head
-    printString("head", headHash, true);
-
     // branches
-    beginNamedObject("branches");
+    beginNamedObject("refs");
     size_t count = 0;
     for (auto &it : branchWithCommitMap)
     {
@@ -211,7 +216,40 @@ void printLogJSON(
             cout << ",";
         cout << "\n";
     }
-    endNamedObject(false);
-
+    endNamedObject(true);
+    // head
+    printString("head", headHash, false);
     endObject(false);
+}
+
+void printingAuthorCommitter(std::string author, std::string timeStamp)
+{
+    using namespace json;
+    std::string name, email;
+    getEmailAndNameFromAuthorString(author, name, email);
+    cout << "    \"" << json::escape("name") << "\": " << "\"" << json::escape(name) << "\"";
+    cout << ",";
+    cout << "\n";
+    cout << "    \"" << json::escape("email") << "\": " << "\"" << json::escape(email) << "\"";
+    cout << ",";
+    cout << "\n";
+    cout << "    \"" << json::escape("date") << "\": " << "\"" << json::escape(timeStamp) << "\"";
+    cout << "\n";
+}
+
+void getEmailAndNameFromAuthorString(const std::string &authorStr, std::string &name, std::string &email)
+{
+    size_t ltPos = authorStr.find('<');
+    size_t gtPos = authorStr.find('>');
+
+    if (ltPos != std::string::npos && gtPos != std::string::npos && gtPos > ltPos)
+    {
+        name = authorStr.substr(0, ltPos); // Exclude space before '<'
+        email = authorStr.substr(ltPos + 1, gtPos - ltPos - 1);
+    }
+    else
+    {
+        name = authorStr;
+        email = "";
+    }
 }

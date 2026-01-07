@@ -125,7 +125,7 @@ CommitObject::CommitObject(string serializedObject) : GitObject(serializedObject
                 else if (key == "author")
                 {
                     author = parts[1];
-                    timeStamp = parts[2] + " " + parts[3]; // 12/12/12 +0000
+                    timeStamp = parts[2]; // 12/12/12 +0000
                 }
             }
             else if (parts.size() == 0)
