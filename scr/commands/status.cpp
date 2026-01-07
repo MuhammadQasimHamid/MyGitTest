@@ -7,7 +7,6 @@
 #include "dataStructure/Ntree.h"
 #include "utils/json_helper.h"
 
-
 using namespace std;
 // #undef byte
 // #include <windows.h>
@@ -34,7 +33,7 @@ void statusCommandExe(int argc, char *argv[])
     vector<string> stagedFiles;         // for json output (paths)
     vector<string> unstagedFiles;       // for json output (paths)
     vector<string> untrackedFiles;      // for json output (paths)
-
+    vector<string> unmergedFiles;       // for json output (paths)
     const string branch = Repository::currentBranch();
     const string cBranchHash = Repository::getBranchHash(branch);
 
@@ -42,7 +41,8 @@ void statusCommandExe(int argc, char *argv[])
     map<path, treeEntry> flattenTree;
     cmpMap<path, indexEntry, treeEntry> cmpMapiEtE;
     for (const auto &iE : StagingIndex::indexEntries)
-        cmpMapiEtE.addVal1(iE.path, iE);
+        if (!StagingIndex::isaConflictFile(absolute(iE.path)))
+            cmpMapiEtE.addVal1(iE.path, iE);
 
     if (!cBranchHash.empty())
     {
@@ -52,12 +52,19 @@ void statusCommandExe(int argc, char *argv[])
         TreeObject TObj(rawFileContentsTree);
         flattenTree = Repository::FlattenTreeObject(TObj);
         for (auto &kv : flattenTree)
-            cmpMapiEtE.addVal2(kv.first, kv.second);
+        {
+            if (!StagingIndex::isaConflictFile(kv.first))
+                cmpMapiEtE.addVal2(kv.first, kv.second);
+            else
+                unmergedFiles.push_back(kv.first.string());
+        }
     }
 
     // Compare index vs last commit (staged changes)
     for (auto &cmpRow : cmpMapiEtE.umap)
     {
+        cout << "Comparison Table" << endl;
+        cout << cmpRow.first << "IE: " << cmpRow.second.val1Exists() << " TE: " << cmpRow.second.val2Exists() << endl;
         const path &key = cmpRow.first;
         const string filepath = key.generic_string();
         cmpPair iEtEPair = cmpRow.second;
@@ -82,16 +89,19 @@ void statusCommandExe(int argc, char *argv[])
     // Compare working dir vs index (unstaged changes)
     for (const auto &iE : StagingIndex::indexEntries)
     {
-        Cmp_Status cmpStatus = Repository::IndexWorkingDirComp(iE, iE.path);
-        if (cmpStatus == CMP_DIFFER)
+        if (!StagingIndex::isaConflictFile(iE.path))
         {
-            unstagedChanges.push_back({iE.path, "modified"});
-            unstagedFiles.push_back(iE.path);
-        }
-        else if (cmpStatus == CMP_IN_WR_NotExist_WR)
-        {
-            unstagedChanges.push_back({iE.path, "deleted"});
-            unstagedFiles.push_back(iE.path);
+            Cmp_Status cmpStatus = Repository::IndexWorkingDirComp(iE, iE.path);
+            if (cmpStatus == CMP_DIFFER)
+            {
+                unstagedChanges.push_back({iE.path, "modified"});
+                unstagedFiles.push_back(iE.path);
+            }
+            else if (cmpStatus == CMP_IN_WR_NotExist_WR)
+            {
+                unstagedChanges.push_back({iE.path, "deleted"});
+                unstagedFiles.push_back(iE.path);
+            }
         }
     }
 
@@ -112,49 +122,64 @@ void statusCommandExe(int argc, char *argv[])
     cout << "On Branch " << branch << endl
          << endl;
 
-    cout << "Changes to be committed:" << endl; // index - last commit
-    cout << "  (use 'git restore --staged <file>...' to unstage)" << endl;
-    if (stagedChanges.empty())
+    if (stagedChanges.size() > 0)
     {
-        cout << "\t(no changes added to commit)" << endl;
-    }
-    else
-    {
-        for (const auto &c : stagedChanges)
+        cout << "Changes to be committed:" << endl; // index - last commit
+        cout << "  (use 'git restore --staged <file>...' to unstage)" << endl;
+        if (stagedChanges.empty())
         {
-            const auto filename = fs::path(c.path).filename().string();
-            if (c.type == "modified")
-                cout << GREEN << "\tmodified:" << "    " << filename << RESETCOLOR << endl;
-            else if (c.type == "new file")
-                cout << GREEN << "\tnew file:" << "    " << filename << RESETCOLOR << endl;
-            else
-                cout << GREEN << "\tdeleted:" << "    " << filename << RESETCOLOR << endl;
+            cout << "\t(no changes added to commit)" << endl;
+        }
+        else
+        {
+            for (const auto &c : stagedChanges)
+            {
+                const auto filename = fs::path(c.path).filename().string();
+                if (c.type == "modified")
+                    cout << GREEN << "\tmodified:" << "    " << filename << RESETCOLOR << endl;
+                else if (c.type == "new file")
+                    cout << GREEN << "\tnew file:" << "    " << filename << RESETCOLOR << endl;
+                else
+                    cout << GREEN << "\tdeleted:" << "    " << filename << RESETCOLOR << endl;
+            }
         }
     }
 
-    cout << "Changes not staged for commit:" << endl;
-    if (unstagedChanges.empty())
+    if (unstagedFiles.size() > 0)
     {
-        cout << "\t(none)" << endl;
-    }
-    else
-    {
-        for (const auto &c : unstagedChanges)
+        cout << "Changes not staged for commit:" << endl;
+        if (unstagedChanges.empty())
         {
-            if (c.type == "modified")
-                cout << RED << "\tmodified" << " " << c.path << RESETCOLOR << endl;
-            else
-                cout << RED << "\tdeleted" << " " << c.path << RESETCOLOR << endl;
+            cout << "\t(none)" << endl;
+        }
+        else
+        {
+            for (const auto &c : unstagedChanges)
+            {
+                if (c.type == "modified")
+                    cout << RED << "\tmodified" << " " << c.path << RESETCOLOR << endl;
+                else
+                    cout << RED << "\tdeleted" << " " << c.path << RESETCOLOR << endl;
+            }
         }
     }
 
-    if (stagedChanges.empty() && unstagedChanges.empty())
+    if (unmergedFiles.size() > 0)
+    {
+        cout << "Unmerged paths:" << endl;
+        for (const auto &u : unmergedFiles)
+            cout << RED << "\t" << u << RESETCOLOR << endl;
+    }
+    if (stagedChanges.empty() && unstagedChanges.empty() && unmergedFiles.empty())
         cout << "Working Area Clean, nothing to commit" << endl;
 
-    cout << "Untracked files:" << endl;
-    cout << "(use \" git add<file>... \" to include in what will be committed)" << endl;
-    for (const auto &u : untrackedFiles)
-        cout << RED << "\tUntracked: " << u << RESETCOLOR << endl;
+    if (untrackedFiles.size() > 0)
+    {
+        cout << "Untracked files:" << endl;
+        cout << "(use \" git add<file>... \" to include in what will be committed)" << endl;
+        for (const auto &u : untrackedFiles)
+            cout << RED << "\tUntracked: " << u << RESETCOLOR << endl;
+    }
 }
 
 void statusJSON(

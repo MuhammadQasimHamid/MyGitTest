@@ -51,10 +51,20 @@ void checkoutCommandExe(int argc, char *argv[])
                     {
                         treeEntry tE = it.second;
                         cmptEPa.addVal1(it.first, tE);
+                        cout << it.first << "  " << tE.name << "  " << tE.hash << endl;
                     }
+
                     // StagingIndex::save();
-                    traverseDirectory(".", [&](const fs::path &relPath)
+                    traverseDirectory(Repository::project_absolute, [&](const fs::path &relPath)
                                       { cmptEPa.addVal2(relPath, relPath); });
+
+                    cout << "Comparison Table: " << endl;
+                    for(auto it: cmptEPa.umap)
+                    {
+                        cout << it.first << " : ";
+                        cout << " Val1Exists:(lastCommit) " << it.second.val1Exists() << " , ";
+                        cout << " Val2Exists:(WR) " << it.second.val2Exists() << endl;
+                    }
 
 
                     for (auto it : cmptEPa.umap)
@@ -64,7 +74,8 @@ void checkoutCommandExe(int argc, char *argv[])
                         treeEntry tE = it.second.getVal1();
                         cout << filePath;
 
-                        if (StagingIndex::isTrackedFile(filePath)) //
+                        cout << "  is in TrackedFile " << StagingIndex::isTrackedFile(filePath);
+                        // if (StagingIndex::isTrackedFile(filePath)   ) //
                         {
                             if (!it.second.val2Exists()) // not exist in WR , but exist in commit
                             {
@@ -73,7 +84,7 @@ void checkoutCommandExe(int argc, char *argv[])
                                 BlobObject bObj(blobRawFileContents); // deserilized constructor called
                                 writeFile(filePath, bObj.contents);   // Re-write
                             }
-                            else if (!it.second.val1Exists()) // so in commit, it does'nt exist so del from here
+                            else if (!it.second.val1Exists() && StagingIndex::isTrackedFile(filePath)) // so in commit, it does'nt exist so del from here if a tracked file
                             {
                                 cout << "Delete file" << endl;
                                 deleteFile(filePath);

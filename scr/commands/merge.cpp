@@ -8,7 +8,12 @@ void mergeCommandExe(int argc, char *argv[])
 {
     if (argc >= 3)
     {
-       
+        string branchToMerge = argv[3 - 1];
+        if (Repository::isaBranch(branchToMerge))
+        {
+            cout << "Merging branch: " << branchToMerge << endl;
+            Repository::mergeBranch(branchToMerge);
+        }
     }
     else
     {
