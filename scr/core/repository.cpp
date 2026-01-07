@@ -52,8 +52,8 @@ fs::path Repository::pitIgnoreFilePath;
 
 void Repository::InitializeClass()
 {
-    // project_absolute = absolute(".");
-    project_absolute = "D:/3rd Sems/DSA/DSAL/VersioningTestUsingPit";
+    project_absolute = absolute(".");
+    // project_absolute = "D:/3rd Sems/DSA/DSAL/VersioningTestUsingPit";
     pitFolderPath = project_absolute / ".pit";
     objectsFolderPath = pitFolderPath / "objects";
     refsFolderPath = pitFolderPath / "refs";
