@@ -130,7 +130,7 @@ string Repository::storeObject(GitObject gitObj)
             create_directory(objectDirPath);
         }
         writeFile(objectFilePath, gitObj.serialize());
-        cout << "Object Saved:(" << gitObj.getHash() << ")     " << gitObj.serialize();
+        // cout << "Object Saved:(" << gitObj.getHash() << ")     " << gitObj.serialize();
     }
     catch (const exception &e)
     {
